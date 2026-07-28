@@ -5,7 +5,7 @@
  */
 window.APP_CONFIG = Object.freeze({
   APP_NAME: 'AEON Promotion Test',
-  API_URL: 'MASUKKAN_URL_APPS_SCRIPT_DI_SINI',
+  API_URL: 'https://script.google.com/macros/s/AKfycby_RbDyr8_oUJ7S0U5hovnPhaqh-U9C1GM-EvXbYwUmYIxtfIyF9EcsuzntCNGetMY9Rg/exec',
   REQUEST_TIMEOUT_MS: 25000,
   PASSING_SCORE: 75,
   DEFAULT_QUESTION_COUNT: 10,
