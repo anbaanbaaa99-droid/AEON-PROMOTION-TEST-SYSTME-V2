@@ -19,17 +19,17 @@
   };
 
   const moduleDescriptions = {
-    "HORENSO": "Komunikasi, instruksi, HORENSO dan PDCA",
-    "JISEKI": "Toujisha Ishiki, Jiseki, Taseki dan ownership",
-    "KYO": "Johari Window, egogram dan komunikasi",
-    "TWIJI": "OJT dan Job Instruction",
-    "DOUKIZUKE": "Motivasi, Herzberg dan feedback",
-    "ALEC": "Komunikasi efektif untuk mendorong kemandirian",
-    "AEON IDEAL": "Customer First, peace, humanity dan local community",
-    "FUTURE VISION": "Visi masa depan, pelanggan dan MIRAI",
-    "AEON FIGURE": "Retail math, gross profit dan inventory",
-    "AEON DNA": "Sejarah AEON dan Semua Demi Pelanggan",
-    "MANAGEMENT": "Objectives, contribution, performance dan self-control"
+    "HORENSO": "Pelaporan, penyampaian informasi, konsultasi, dan PDCA",
+    "JISEKI": "Ownership, tanggung jawab, dan penyelesaian masalah proaktif",
+    "KYO": "Johari Window, Egogram, ego state, dan komunikasi adaptif",
+    "TWIJI": "OJT, Job Breakdown, dan cara mengajarkan pekerjaan",
+    "DOUKIZUKE": "Motivasi, self-efficacy, feedback, dan pengembangan tim",
+    "ALEC": "Active listening, questioning, HORENSO, dan kemandirian tim",
+    "AEON_FIGURE": "Perhitungan retail, gross profit, inventory, dan stock rotation",
+    "FUTURE_VISION": "Future Vision, customer orientation, relationships, attitudes, dan promise",
+    "FOUNDATIONAL_IDEAL": "Customer First, peace, humanity, local community, dan innovation",
+    "MANAGEMENT": "Management, performance, customer, marketing, innovation, dan mission",
+    "SEMUA_DEMI_PELANGGAN": "Customer First, sejarah AEON, merger, dan people development",
   };
 
   document.addEventListener('DOMContentLoaded', init);
@@ -37,6 +37,7 @@
   function init() {
     bindGlobalEvents();
     restoreTheme();
+    updateServerStatus();
     if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       navigator.serviceWorker.register('service-worker.js').catch(() => {});
     }
@@ -62,6 +63,7 @@
     $('#readerPrevious').addEventListener('click', () => moveReadingSection(-1));
     $('#readerNext').addEventListener('click', () => moveReadingSection(1));
     $('#readerPracticeButton').addEventListener('click', startPracticeFromReader);
+    $('#readerPdfToggle').addEventListener('click', toggleReaderPdf);
     $('#beginQuizButton').addEventListener('click', beginQuiz);
     $('#questionCount').addEventListener('change', validateQuizSettings);
     $('#durationMinutes').addEventListener('change', validateQuizSettings);
@@ -95,6 +97,35 @@
       state.pendingConfirm = null;
       if ($('#confirmDialog').returnValue === 'confirm' && typeof action === 'function') action();
     });
+  }
+
+  async function updateServerStatus() {
+    const box = $('#serverStatus');
+    const text = $('#serverStatusText');
+    const demoBox = $('#demoCredentials');
+    if (!box || !text) return;
+    box.classList.remove('ok','demo','error');
+    if (api.demoMode) {
+      box.classList.add('demo');
+      text.textContent = 'Mode demo — backend belum digunakan';
+      demoBox?.classList.remove('hidden');
+      return;
+    }
+    demoBox?.classList.add('hidden');
+    if (!api.isConfigured) {
+      box.classList.add('error');
+      text.textContent = 'API belum dikonfigurasi';
+      return;
+    }
+    text.textContent = 'Memeriksa koneksi server...';
+    try {
+      const health = await api.health();
+      box.classList.add('ok');
+      text.textContent = `Server terhubung${health?.version ? ' · v'+health.version : ''}`;
+    } catch (error) {
+      box.classList.add('error');
+      text.textContent = 'Server tidak dapat dijangkau';
+    }
   }
 
   async function handleLogin(event) {
@@ -215,6 +246,8 @@
     $('#loginView').classList.remove('hidden');
     document.title = `Login · ${cfg.APP_NAME}`;
     switchAuthMode('login');
+    const demoBox = $('#demoCredentials');
+    if (demoBox) demoBox.classList.toggle('hidden', !api.demoMode);
   }
 
   function route() {
@@ -314,7 +347,7 @@
       if (!sections.length) throw new Error('Isi modul belum tersedia.');
       const saved = response.progress || {};
       const savedIndex = clamp(Number(saved.lastSection) || 0, 0, sections.length - 1);
-      state.reading = { module:response.module, sections, sectionIndex:savedIndex, progress:clamp(saved.progress || 0,0,100), saving:false };
+      state.reading = { module:response.module, sections, sectionIndex:savedIndex, progress:clamp(saved.progress || 0,0,100), saving:false, pdfOpen:false };
       renderReadingLibrary();
       renderReader();
     } catch (error) { handleApiError(error); }
@@ -338,12 +371,23 @@
     $('#readerTitle').textContent = module.title || module.name || 'Modul';
     $('#readerSummary').textContent = module.summary || module.description || '';
     $('#readerMinutes').textContent = `± ${Number(module.readingMinutes)||5} menit`;
-    const sourcePdf = String(module.sourcePdf || '');
-    $('#readerSourcePdf').classList.toggle('hidden', !sourcePdf);
-    if (sourcePdf) $('#readerSourcePdf').href = sourcePdf;
     $('#readerProgressText').textContent = `${progress}%`;
     $('#readerProgressBar').style.width = `${progress}%`;
     $('#readerSectionIndex').textContent = `Bagian ${index + 1}/${sections.length}`;
+    const sourcePages = String(section.sourcePages || '').trim();
+    $('#readerSourcePages').textContent = sourcePages ? `Sumber PDF: halaman ${sourcePages}` : 'Ringkasan materi';
+    const pdfUrl = String(module.pdfUrl || '').trim();
+    $('#readerPdfTools').classList.toggle('hidden', !pdfUrl);
+    $('#readerPdfOpen').href = pdfUrl || '#';
+    $('#readerPdfToggle').textContent = reading.pdfOpen ? 'Sembunyikan PDF' : 'Tampilkan PDF';
+    $('#readerPdfPanel').classList.toggle('hidden', !reading.pdfOpen || !pdfUrl);
+    if (reading.pdfOpen && pdfUrl) {
+      const firstPage = (sourcePages.match(/\d+/) || [''])[0];
+      const desiredSrc = `${pdfUrl}${firstPage ? `#page=${firstPage}` : ''}`;
+      if ($('#readerPdfFrame').getAttribute('src') !== desiredSrc) $('#readerPdfFrame').src = desiredSrc;
+    } else if ($('#readerPdfFrame').getAttribute('src')) {
+      $('#readerPdfFrame').removeAttribute('src');
+    }
     $('#readerSectionTitle').textContent = section.title || `Bagian ${index + 1}`;
     $('#readerSectionBody').innerHTML = String(section.body || '').split(/\n{2,}/).filter(Boolean).map(paragraph => `<p>${escapeHtml(paragraph)}</p>`).join('');
     const bullets = Array.isArray(section.bullets) ? section.bullets : [];
@@ -354,6 +398,12 @@
     $('#readerNext').disabled = reading.saving || (index === sections.length - 1 && progress >= 100);
     $('#readerCompleteBadge').textContent = progress >= 100 ? 'Selesai' : progress > 0 ? 'Sedang dibaca' : 'Belum selesai';
     $('#readerCompleteBadge').className = `account-status ${progress >= 100 ? 'approved' : 'pending'}`;
+  }
+
+  function toggleReaderPdf() {
+    if (!state.reading?.module?.pdfUrl) return toast('PDF asli belum tersedia untuk modul ini.', 'error');
+    state.reading.pdfOpen = !state.reading.pdfOpen;
+    renderReader();
   }
 
   async function moveReadingSection(delta) {

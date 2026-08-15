@@ -1,91 +1,76 @@
-# AEON Learning & Promotion Test v5
+# AEON Learning & Promotion Test v5.1 — Auth & Layout Fix
 
-Versi ini memperbarui **Baca Modul** dan **bank soal** berdasarkan materi PDF yang diberikan untuk project ini.
+Versi 5.1 adalah patch untuk masalah yang terlihat pada halaman login v5:
 
-## Konten v5
+- hero/login kiri terpotong karena markup HTML dan CSS v5 tidak sinkron;
+- kotak **Mode demo aktif** sebelumnya selalu terlihat walaupun backend sebenarnya sudah dikonfigurasi;
+- session frontend dibuat lebih tahan reload dengan memory + localStorage/sessionStorage fallback;
+- session backend sekarang menyimpan waktu kedaluwarsa sebagai epoch milliseconds agar tidak bergantung pada format tanggal/locale Google Sheet;
+- `config.js`, `api.js`, dan `app.js` memakai cache-busting `?v=5.1.0`;
+- Service Worker v5.1 selalu mengambil `config.js` terbaru dan menghapus cache versi lama;
+- elemen PDF reader yang sudah dipanggil `app.js` tetapi belum ada di `index.html` sekarang sudah ditambahkan.
 
-Tersedia 11 kelompok materi:
-1. HORENSO — Lancar Tanpa Hambatan
-2. JISEKI — Bekerja dengan Ownership
-3. K.Y.O. — Know Yourself and Others
-4. TWIJI — Training Within Industry Job Instruction
-5. DOUKIZUKE — Motivation
-6. ALEC — Active Listening for Effective Communication
-7. AEON Foundational Ideal
-8. Future Vision Grup AEON
-9. AEON Figure 1, 2 & 3
-10. Semua Demi Pelanggan — AEON DNA
-11. Management — ringkasan konsep pilihan Peter F. Drucker
+## PENTING — langkah upgrade
 
-Bank latihan berisi **88 soal pilihan ganda**, masing-masing 8 soal per kelompok materi.
+1. **Backup Google Sheet dan Apps Script terlebih dahulu.**
+2. Ganti isi Apps Script dengan `Code.gs` v5.1.
+3. Bila `DEFAULT_ADMIN_PASSWORD` pernah diubah setelah `setupSystem()` pertama kali dijalankan, jalankan:
 
-Setiap materi juga menyertakan tombol **Buka PDF asli**. File PDF sumber ditempatkan di `/assets/modules/`, sehingga peserta dapat membaca ringkasan cepat di web atau membuka modul lengkap.
+   `resetAdminPassword()`
 
-## Sumber materi yang dipakai
+   Contoh: bila sekarang `DEFAULT_ADMIN_PASSWORD = 'admin1006'`, fungsi ini yang benar-benar memperbarui hash password akun ADMIN di sheet `Users`.
 
-- JISEKI - Bekerja Dengan Ownership.pdf
-- HORENSO - Lancar Tanpa Hambatan.pdf
-- KYO - Know Yourself and Others.pdf
-- TWIJI - Training Within Industry Job Instruction.pdf
-- Doukizuke.pdf
-- ALEC - Active Listening for Effective Communication.pdf
-- AEON Foundational Ideal (ID).pdf
-- Future Vision Booklet (ID).pdf
-- AEON Figure 1 2 3 (ID).pdf
-- Comic Everything We Do We Do For Our Customers (Ch. 1-5).pdf
-- Management - Tasks, Responsibilities, Practices by Peter Drucker.pdf
+4. Jalankan:
 
-Materi baca di web adalah **ringkasan pembelajaran**, bukan salinan penuh PDF. Isi pertanyaan disusun dari konsep yang didukung sumber-sumber tersebut.
+   `testAdminSession()`
 
-## Instalasi baru
+   Bila backend benar, hasilnya mengandung:
 
-1. Backup Google Sheet dan Apps Script.
-2. Ganti isi Apps Script dengan `Code.gs` v5.
-3. Ubah `DEFAULT_ADMIN_PASSWORD` sebelum produksi.
-4. Jalankan `setupSystem()` sekali.
-5. Deploy Web App sebagai versi baru:
+   `"ok": true` dan `"message": "Backend login dan session valid."`
+
+5. Deploy ulang Apps Script sebagai **New version**:
    - Execute as: **Me**
    - Who has access: **Anyone**
-6. Pastikan `assets/js/config.js` memakai URL `/exec` deployment yang benar.
-7. Upload/replace seluruh frontend v5.
-8. Hard refresh (`Ctrl+Shift+R`) sekali.
+6. Salin URL Web App yang berakhir `/exec` ke `assets/js/config.js` bila URL deployment berubah.
+7. Replace **seluruh** frontend dengan folder v5.1, jangan hanya `index.html`.
+8. Buka web lalu lakukan **Ctrl + Shift + R** satu kali.
+9. Jika browser masih menampilkan versi lama, buka DevTools → Application → Service Workers → **Unregister**, lalu reload.
 
-## Upgrade dari v3/v4 tanpa menghapus akun dan hasil
+## Cara membaca status koneksi
 
-1. **Backup Spreadsheet terlebih dahulu.**
-2. Ganti `Code.gs` dengan versi v5.
-3. Jalankan **`upgradeContentV5()` satu kali** dari editor Apps Script.
-4. Fungsi ini mengganti isi sheet `Modules` dan `Questions` dengan konten v5.
-5. Fungsi tersebut **tidak menghapus** `Users`, `ReadingProgress`, `Results`, `Sessions`, atau `QuizSessions`.
-6. Deploy ulang Web App sebagai **New version**.
-7. Upload frontend v5 dan lakukan hard refresh.
+Di kartu login sekarang ada indikator:
 
-> Catatan: progress lama untuk modul dengan nama yang masih sama tetap ada. Katalog lama `8 BASIC` diganti dengan modul sumber yang lebih spesifik.
+- **Server terhubung · v5.1.0** → frontend sudah berbicara dengan Apps Script.
+- **Server tidak dapat dijangkau** → cek deployment Apps Script / URL `API_URL`.
+- **API belum dikonfigurasi** → `API_URL` di `assets/js/config.js` kosong/tidak valid.
 
-## Struktur frontend
+Mode demo dinonaktifkan secara default pada paket produksi v5.1.
+
+## Tentang data lama
+
+Patch v5.1 tidak perlu menghapus akun, nilai, modul, progress membaca, atau hasil ujian. Format session lama berupa Date masih dapat dibaca; session baru memakai epoch milliseconds.
+
+## Struktur
 
 ```text
 /index.html
 /manifest.webmanifest
 /service-worker.js
-/assets/icon.svg
 /assets/css/style.css
 /assets/js/config.js
 /assets/js/api.js
 /assets/js/app.js
 /assets/modules/*.pdf
+/Code.gs
 ```
 
-## Tes yang disarankan
+## Tes akhir
 
-1. Register peserta baru → status Pending.
-2. Login admin → ACC peserta.
-3. Login peserta.
-4. Buka **Baca Modul** dan pastikan 11 kelompok materi tampil.
-5. Buka HORENSO/JISEKI/KYO lalu pindah section dan cek progress.
-6. Klik **Latihan soal modul ini**.
-7. Pastikan latihan mengambil soal dari modul yang sama.
-8. Uji AEON Figure untuk memastikan soal perhitungan tampil.
-9. Selesaikan tes dan cek riwayat serta monitoring admin.
-
-Service Worker v5 menggunakan cache `aeon-promotion-test-v5`.
+1. Jalankan `testAdminSession()` di Apps Script.
+2. Login ADMIN dari web.
+3. Reload halaman; akun harus tetap login selama session belum kedaluwarsa.
+4. Register akun peserta baru → Pending.
+5. ADMIN → Monitoring → ACC peserta.
+6. Login peserta → Baca Modul → pindah bagian → progress tersimpan.
+7. Buka PDF asli dari reader.
+8. Kerjakan latihan dan cek riwayat nilai.

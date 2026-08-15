@@ -9,7 +9,7 @@
 <title>AEON Promotion Test</title>
 <link href="manifest.webmanifest" rel="manifest"/>
 <link href="assets/icon.svg" rel="icon" type="image/svg+xml"/>
-<link href="assets/css/style.css" rel="stylesheet"/>
+<link href="assets/css/style.css?v=5.1.0" rel="stylesheet"/>
 </head>
 <body>
 <a class="skip-link" href="#mainContent">Lewati ke konten</a>
@@ -48,6 +48,7 @@
 <span class="brand-mark">A</span>
 <span><strong>AEON</strong><small>Learning &amp; Promotion Test</small></span>
 </div>
+<div class="server-status" id="serverStatus" aria-live="polite"><span class="server-status-dot"></span><span id="serverStatusText">Memeriksa koneksi server...</span></div>
 <div aria-label="Akun" class="auth-tabs" role="tablist">
 <button aria-selected="true" class="auth-tab active" data-auth-mode="login" id="loginTab" role="tab" type="button">Masuk</button>
 <button aria-selected="false" class="auth-tab" data-auth-mode="register" id="registerTab" role="tab" type="button">Daftar akun</button>
@@ -60,10 +61,10 @@
 </div>
 <form id="loginForm" novalidate="">
 <label class="field"><span>ID Peserta</span><input autocomplete="username" id="employeeId" name="employeeId" placeholder="Contoh: AEON-JORDAN01" required=""/><small class="field-error" id="employeeIdError"></small></label>
-<label class="field"><span>Password</span><span class="password-wrap"><input autocomplete="current-password" id="password" minlength="6" name="password" placeholder="Masukkan password" required="" type="password"/><button aria-label="Tampilkan password" class="password-toggle" id="togglePassword" type="button">👁</button></span><small class="field-error" id="passwordError"></small></label>
+<label class="field"><span>Password</span><span class="password-wrap"><input autocomplete="current-password" id="password" minlength="6" name="password" placeholder="Masukkan password" required="" type="password"/><button aria-label="Tampilkan password" class="password-toggle" id="togglePassword" type="button">Lihat</button></span><small class="field-error" id="passwordError"></small></label>
 <button class="button button-primary button-block" id="loginButton" type="submit"><span class="button-label">Masuk</span><span aria-hidden="true" class="spinner hidden"></span></button>
 </form>
-<div class="demo-box" id="demoCredentials"><strong>Mode demo aktif</strong><span>Peserta: <code>001</code> / <code>12345</code></span><span>Admin: <code>ADMIN</code> / <code>admin123</code></span></div>
+<div class="demo-box hidden" id="demoCredentials"><strong>Mode demo aktif</strong><span>Peserta: <code>001</code> / <code>12345</code></span><span>Admin: <code>ADMIN</code> / <code>admin123</code></span></div>
 </section>
 <section class="auth-form-panel hidden" id="registerPanel">
 <div class="auth-heading">
@@ -79,7 +80,7 @@
 <label class="field"><span>Nama lengkap</span><input autocomplete="name" id="registerName" maxlength="100" placeholder="Nama sesuai data peserta"/><small class="field-error" id="registerNameError"></small></label>
 <label class="field"><span>Departemen / Divisi</span><input id="registerDepartment" maxlength="80" placeholder="Contoh: Store Operation"/><small class="field-error" id="registerDepartmentError"></small></label>
 <div class="field-grid two">
-<label class="field"><span>Password</span><span class="password-wrap"><input autocomplete="new-password" id="registerPassword" minlength="6" placeholder="Minimal 6 karakter" type="password"/><button aria-label="Tampilkan password" class="password-toggle" id="toggleRegisterPassword" type="button">👁</button></span><small class="field-error" id="registerPasswordError"></small></label>
+<label class="field"><span>Password</span><span class="password-wrap"><input autocomplete="new-password" id="registerPassword" minlength="6" placeholder="Minimal 6 karakter" type="password"/><button aria-label="Tampilkan password" class="password-toggle" id="toggleRegisterPassword" type="button">Lihat</button></span><small class="field-error" id="registerPasswordError"></small></label>
 <label class="field"><span>Ulangi password</span><input autocomplete="new-password" id="registerPasswordConfirm" minlength="6" placeholder="Ketik ulang password" type="password"/><small class="field-error" id="registerPasswordConfirmError"></small></label>
 </div>
 <label class="check-row"><input id="registerConsent" type="checkbox"/><span>Saya memastikan data yang saya isi benar.</span></label><small class="field-error" id="registerConsentError"></small>
@@ -149,10 +150,12 @@
 <div class="hidden" id="readerContent">
 <header class="reader-header">
 <div><p class="eyebrow" id="readerModuleCode">MODULE</p><h2 id="readerTitle">Judul modul</h2><p class="muted" id="readerSummary"></p></div>
-<div class="reader-meta"><span id="readerMinutes">± 0 menit</span><span class="account-status pending" id="readerCompleteBadge">Belum selesai</span><a id="readerSourcePdf" class="button button-secondary button-small hidden" href="#" target="_blank" rel="noopener">Buka PDF asli ↗</a></div>
+<div class="reader-meta"><span id="readerMinutes">± 0 menit</span><span class="account-status pending" id="readerCompleteBadge">Belum selesai</span></div>
 </header>
 <div class="reader-progress"><div class="reading-progress-track"><span id="readerProgressBar"></span></div><strong id="readerProgressText">0%</strong></div>
-<div class="reader-section-nav"><span id="readerSectionIndex">Bagian 1/1</span></div>
+<div class="reader-section-nav"><span id="readerSectionIndex">Bagian 1/1</span><span class="reader-source-pages" id="readerSourcePages">Ringkasan materi</span></div>
+<div class="reader-pdf-tools hidden" id="readerPdfTools"><button class="button button-secondary button-small" id="readerPdfToggle" type="button">Tampilkan PDF</button><a class="button button-ghost button-small" id="readerPdfOpen" href="#" target="_blank" rel="noopener">Buka PDF asli ↗</a></div>
+<div class="reader-pdf-panel hidden" id="readerPdfPanel"><iframe id="readerPdfFrame" title="PDF modul asli" loading="lazy"></iframe></div>
 <section class="reader-article"><h3 id="readerSectionTitle"></h3><div class="reader-body" id="readerSectionBody"></div><ul class="reader-bullets" id="readerSectionBullets"></ul></section>
 <footer class="reader-actions"><button class="button button-secondary" id="readerPrevious" type="button">← Sebelumnya</button><button class="button button-ghost" id="readerPracticeButton" type="button">Latihan soal modul ini</button><button class="button button-primary" id="readerNext" type="button">Berikutnya →</button></footer>
 </div>
@@ -243,8 +246,8 @@
 <dialog class="confirm-dialog" id="confirmDialog">
 <form method="dialog"><h2 id="confirmTitle">Konfirmasi</h2><p id="confirmMessage">Apakah Anda yakin?</p><div class="dialog-actions"><button class="button button-secondary" value="cancel">Batal</button><button class="button button-danger" id="confirmAction" value="confirm">Ya, lanjutkan</button></div></form>
 </dialog>
-<script src="assets/js/config.js"></script>
-<script src="assets/js/api.js"></script>
-<script src="assets/js/app.js"></script>
+<script src="assets/js/config.js?v=5.1.0"></script>
+<script src="assets/js/api.js?v=5.1.0"></script>
+<script src="assets/js/app.js?v=5.1.0"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 /*
  * Konfigurasi frontend.
  * Ganti API_URL dengan URL deployment Google Apps Script (/exec).
- * Saat masih berisi placeholder, aplikasi otomatis berjalan dalam mode demo.
+ * Paket produksi v5.1 tidak otomatis masuk mode demo bila API belum dikonfigurasi.
  */
 window.APP_CONFIG = Object.freeze({
   APP_NAME: 'AEON Learning & Promotion Test',
@@ -10,5 +10,5 @@ window.APP_CONFIG = Object.freeze({
   PASSING_SCORE: 75,
   DEFAULT_QUESTION_COUNT: 10,
   DEFAULT_DURATION_MINUTES: 20,
-  ENABLE_DEMO_WHEN_UNCONFIGURED: true
+  ENABLE_DEMO_WHEN_UNCONFIGURED: false
 });
