@@ -14,17 +14,22 @@
     timerId: null,
     latestResult: null,
     adminData: null,
+    reading: null,
     pendingConfirm: null
   };
 
   const moduleDescriptions = {
-    HORENSO: 'Pelaporan, informasi, dan konsultasi',
-    JISEKI: 'Ownership dan tanggung jawab',
-    KYO: 'Kesadaran diri dan kolaborasi',
-    TWIJI: 'Job instruction dan OJT',
-    DOUKIZUKE: 'Motivasi dan pengembangan',
-    ALEC: 'Mendengar dan komunikasi efektif',
-    '8 BASIC': 'Dasar perilaku dan standar kerja'
+    "HORENSO": "Komunikasi, instruksi, HORENSO dan PDCA",
+    "JISEKI": "Toujisha Ishiki, Jiseki, Taseki dan ownership",
+    "KYO": "Johari Window, egogram dan komunikasi",
+    "TWIJI": "OJT dan Job Instruction",
+    "DOUKIZUKE": "Motivasi, Herzberg dan feedback",
+    "ALEC": "Komunikasi efektif untuk mendorong kemandirian",
+    "AEON IDEAL": "Customer First, peace, humanity dan local community",
+    "FUTURE VISION": "Visi masa depan, pelanggan dan MIRAI",
+    "AEON FIGURE": "Retail math, gross profit dan inventory",
+    "AEON DNA": "Sejarah AEON dan Semua Demi Pelanggan",
+    "MANAGEMENT": "Objectives, contribution, performance dan self-control"
   };
 
   document.addEventListener('DOMContentLoaded', init);
@@ -45,11 +50,18 @@
   }
 
   function bindGlobalEvents() {
+    $$('[data-auth-mode]').forEach(button => button.addEventListener('click', () => switchAuthMode(button.dataset.authMode)));
     $('#loginForm').addEventListener('submit', handleLogin);
+    $('#registerForm').addEventListener('submit', handleRegister);
     $('#togglePassword').addEventListener('click', togglePassword);
+    $('#toggleRegisterPassword').addEventListener('click', () => togglePasswordField('#registerPassword', '#toggleRegisterPassword'));
     $('#logoutButton').addEventListener('click', confirmLogout);
     $('#themeToggle').addEventListener('click', toggleTheme);
     $('#startPracticeButton').addEventListener('click', () => navigate('practice'));
+    $('#startReadingButton').addEventListener('click', () => navigate('modules'));
+    $('#readerPrevious').addEventListener('click', () => moveReadingSection(-1));
+    $('#readerNext').addEventListener('click', () => moveReadingSection(1));
+    $('#readerPracticeButton').addEventListener('click', startPracticeFromReader);
     $('#beginQuizButton').addEventListener('click', beginQuiz);
     $('#questionCount').addEventListener('change', validateQuizSettings);
     $('#durationMinutes').addEventListener('change', validateQuizSettings);
@@ -66,6 +78,9 @@
     $('#adminModuleFilter').addEventListener('change', renderAdminResults);
     $('#adminStatusFilter').addEventListener('change', renderAdminResults);
     $('#adminSearch').addEventListener('input', debounce(renderAdminResults, 150));
+    $('#adminAccountStatusFilter').addEventListener('change', renderAdminAccounts);
+    $('#adminAccountSearch').addEventListener('input', debounce(renderAdminAccounts, 150));
+    $('#refreshAdminUsers').addEventListener('click', loadAdminDashboard);
     $('#exportMyHistory').addEventListener('click', exportMyHistory);
     $('#exportAdminReport').addEventListener('click', exportAdminReport);
     window.addEventListener('hashchange', route);
@@ -104,11 +119,69 @@
     } finally { setButtonLoading($('#loginButton'), false); }
   }
 
+
+  function switchAuthMode(mode) {
+    const registerMode = mode === 'register';
+    $('#loginPanel').classList.toggle('hidden', registerMode);
+    $('#registerPanel').classList.toggle('hidden', !registerMode);
+    $('#loginTab').classList.toggle('active', !registerMode);
+    $('#registerTab').classList.toggle('active', registerMode);
+    $('#loginTab').setAttribute('aria-selected', String(!registerMode));
+    $('#registerTab').setAttribute('aria-selected', String(registerMode));
+    if (registerMode) {
+      $('#registrationSuccess').classList.add('hidden');
+      setTimeout(() => $('#registerId').focus(), 30);
+    } else {
+      setTimeout(() => $('#employeeId').focus(), 30);
+    }
+  }
+
+  async function handleRegister(event) {
+    event.preventDefault();
+    clearRegisterErrors();
+    $('#registrationSuccess').classList.add('hidden');
+
+    const payload = {
+      id: $('#registerId').value.trim(),
+      name: $('#registerName').value.trim(),
+      department: $('#registerDepartment').value.trim(),
+      level: $('#registerLevel').value.trim(),
+      password: $('#registerPassword').value
+    };
+    const confirmPassword = $('#registerPasswordConfirm').value;
+    let invalid = false;
+
+    if (!/^[A-Za-z0-9._-]{4,30}$/.test(payload.id)) {
+      $('#registerIdError').textContent = 'Gunakan 4–30 karakter: huruf, angka, titik, strip, atau underscore.'; invalid = true;
+    }
+    if (payload.name.length < 3) { $('#registerNameError').textContent = 'Nama lengkap wajib diisi.'; invalid = true; }
+    if (!payload.department) { $('#registerDepartmentError').textContent = 'Departemen / divisi wajib diisi.'; invalid = true; }
+    if (payload.password.length < 6) { $('#registerPasswordError').textContent = 'Password minimal 6 karakter.'; invalid = true; }
+    if (confirmPassword !== payload.password) { $('#registerPasswordConfirmError').textContent = 'Konfirmasi password belum sama.'; invalid = true; }
+    if (!$('#registerConsent').checked) { $('#registerConsentError').textContent = 'Konfirmasi data terlebih dahulu.'; invalid = true; }
+    if (invalid) return;
+
+    setButtonLoading($('#registerButton'), true);
+    try {
+      const result = await api.register(payload);
+      const registeredId = result.user?.id || payload.id;
+      $('#registrationSuccessText').textContent = `ID ${registeredId} sudah dibuat dan berstatus menunggu approval. Setelah admin ACC, gunakan ID dan password ini untuk login.`;
+      $('#registrationSuccess').classList.remove('hidden');
+      $('#employeeId').value = registeredId;
+      $('#registerForm').reset();
+      toast('Permintaan akun berhasil dikirim ke admin.', 'success');
+    } catch (error) {
+      const message = error?.message || 'Registrasi gagal diproses.';
+      if (error?.code === 'DUPLICATE_ID' || /sudah.*(digunakan|terdaftar|ada)/i.test(message)) $('#registerIdError').textContent = message;
+      else toast(message, 'error');
+    } finally { setButtonLoading($('#registerButton'), false); }
+  }
+
   async function loadApplication() {
     await refreshBootstrap();
     configureUserUI();
     const requested = (location.hash.replace('#/', '') || 'dashboard').split('?')[0];
-    const allowed = ['dashboard','practice','history','admin'];
+    const allowed = ['dashboard','modules','practice','history','admin'];
     if (!allowed.includes(requested) || (requested === 'admin' && !isAdmin())) location.hash = '#/dashboard';
     else route();
   }
@@ -118,6 +191,7 @@
     state.bootstrap = data;
     state.user = data.user || state.user;
     renderDashboard();
+    renderReadingLibrary();
     renderPractice();
     renderHistoryFilters();
     renderHistory();
@@ -140,14 +214,14 @@
     $('#resultView').classList.add('hidden');
     $('#loginView').classList.remove('hidden');
     document.title = `Login · ${cfg.APP_NAME}`;
-    setTimeout(() => $('#employeeId').focus(), 50);
+    switchAuthMode('login');
   }
 
   function route() {
     if (!state.user) return showLogin();
     const routeName = (location.hash.replace('#/', '') || 'dashboard').split('?')[0];
     if (routeName === 'admin' && !isAdmin()) return navigate('dashboard');
-    if (!['dashboard','practice','history','admin'].includes(routeName)) return navigate('dashboard');
+    if (!['dashboard','modules','practice','history','admin'].includes(routeName)) return navigate('dashboard');
 
     $('#loginView').classList.add('hidden');
     $('#quizView').classList.add('hidden');
@@ -159,6 +233,7 @@
     $$('[data-route-link]').forEach(link => link.classList.toggle('active', link.dataset.routeLink === routeName));
     document.title = `${capitalize(routeName)} · ${cfg.APP_NAME}`;
     if (routeName === 'admin') loadAdminDashboard();
+    if (routeName === 'modules') renderReadingLibrary();
     window.scrollTo({ top:0, behavior:'smooth' });
   }
 
@@ -193,8 +268,141 @@
       <button class="button button-primary button-small" type="button" data-recommend-module="${escapeAttr(target.module)}">Latihan modul</button>` : '<p class="muted">Belum ada rekomendasi.</p>';
     $('[data-recommend-module]')?.addEventListener('click', event => { selectModule(event.currentTarget.dataset.recommendModule); navigate('practice'); });
 
+    const totalReadingModules = Number(data.summary?.totalModules) || (data.modules || []).length;
+    const completedReadingModules = Number(data.summary?.modulesRead) || (data.readingProgress || []).filter(item => Number(item.progress) >= 100).length;
+    const readingPercent = totalReadingModules ? Math.round(completedReadingModules / totalReadingModules * 100) : 0;
+    $('#dashboardReadingCompleted').textContent = `${completedReadingModules}/${totalReadingModules}`;
+    $('#dashboardReadingPercent').textContent = `${readingPercent}%`;
+    $('#dashboardReadingProgressBar').style.width = `${readingPercent}%`;
+
     const latest = (data.results || []).slice(0, 3);
     $('#recentResultsBody').innerHTML = latest.length ? latest.map(resultRow).join('') : emptyRow(4, 'Belum ada hasil ujian.');
+  }
+
+
+  function readingProgressMap() {
+    return Object.fromEntries((state.bootstrap?.readingProgress || []).map(item => [String(item.module || '').toUpperCase(), item]));
+  }
+
+  function renderReadingLibrary() {
+    if (!state.bootstrap) return;
+    const modules = (state.bootstrap.modules || []).filter(module => module.hasMaterial !== false);
+    const map = readingProgressMap();
+    const completed = modules.filter(module => Number(map[String(module.name).toUpperCase()]?.progress) >= 100).length;
+    const percent = modules.length ? Math.round(completed / modules.length * 100) : 0;
+    $('#readingOverallPercent').textContent = `${percent}%`;
+    $('#readingOverallBar').style.width = `${percent}%`;
+    $('#readingCompletedCount').textContent = `${completed}/${modules.length}`;
+
+    $('#readingModuleList').innerHTML = modules.length ? modules.map(module => {
+      const progress = clamp(map[String(module.name).toUpperCase()]?.progress || 0, 0, 100);
+      const active = state.reading?.module?.name === module.name;
+      return `<button class="reading-module-item ${active ? 'active' : ''}" type="button" data-read-module="${escapeAttr(module.name)}">
+        <header><h3>${escapeHtml(module.title || module.name)}</h3><span class="account-status ${progress >= 100 ? 'approved' : progress > 0 ? 'pending' : 'rejected'}">${progress >= 100 ? 'Selesai' : progress > 0 ? `${progress}%` : 'Mulai'}</span></header>
+        <p>${escapeHtml(module.description || moduleDescriptions[module.name] || '')}</p>
+        <div class="module-meta-line"><span>${Number(module.readingMinutes)||5} menit baca</span><span>${Number(module.questionCount)||0} soal</span></div>
+        <div class="mini-progress"><span style="width:${progress}%"></span></div>
+      </button>`;
+    }).join('') : '<p class="muted">Belum ada materi baca aktif.</p>';
+    $$('[data-read-module]', $('#readingModuleList')).forEach(button => button.addEventListener('click', () => openReadingModule(button.dataset.readModule)));
+  }
+
+  async function openReadingModule(moduleName) {
+    try {
+      const response = await api.getModule(moduleName);
+      const sections = Array.isArray(response.module?.sections) ? response.module.sections : [];
+      if (!sections.length) throw new Error('Isi modul belum tersedia.');
+      const saved = response.progress || {};
+      const savedIndex = clamp(Number(saved.lastSection) || 0, 0, sections.length - 1);
+      state.reading = { module:response.module, sections, sectionIndex:savedIndex, progress:clamp(saved.progress || 0,0,100), saving:false };
+      renderReadingLibrary();
+      renderReader();
+    } catch (error) { handleApiError(error); }
+  }
+
+  function renderReader() {
+    const reading = state.reading;
+    if (!reading) {
+      $('#readingEmpty').classList.remove('hidden');
+      $('#readerContent').classList.add('hidden');
+      return;
+    }
+    const module = reading.module;
+    const sections = reading.sections;
+    const index = clamp(reading.sectionIndex, 0, sections.length - 1);
+    const section = sections[index] || {};
+    const progress = clamp(reading.progress || 0,0,100);
+    $('#readingEmpty').classList.add('hidden');
+    $('#readerContent').classList.remove('hidden');
+    $('#readerModuleCode').textContent = module.name || 'MODULE';
+    $('#readerTitle').textContent = module.title || module.name || 'Modul';
+    $('#readerSummary').textContent = module.summary || module.description || '';
+    $('#readerMinutes').textContent = `± ${Number(module.readingMinutes)||5} menit`;
+    const sourcePdf = String(module.sourcePdf || '');
+    $('#readerSourcePdf').classList.toggle('hidden', !sourcePdf);
+    if (sourcePdf) $('#readerSourcePdf').href = sourcePdf;
+    $('#readerProgressText').textContent = `${progress}%`;
+    $('#readerProgressBar').style.width = `${progress}%`;
+    $('#readerSectionIndex').textContent = `Bagian ${index + 1}/${sections.length}`;
+    $('#readerSectionTitle').textContent = section.title || `Bagian ${index + 1}`;
+    $('#readerSectionBody').innerHTML = String(section.body || '').split(/\n{2,}/).filter(Boolean).map(paragraph => `<p>${escapeHtml(paragraph)}</p>`).join('');
+    const bullets = Array.isArray(section.bullets) ? section.bullets : [];
+    $('#readerSectionBullets').innerHTML = bullets.map(item => `<li>${escapeHtml(item)}</li>`).join('');
+    $('#readerSectionBullets').classList.toggle('hidden', !bullets.length);
+    $('#readerPrevious').disabled = index === 0;
+    $('#readerNext').textContent = index === sections.length - 1 ? (progress >= 100 ? 'Sudah selesai ✓' : 'Tandai selesai ✓') : 'Berikutnya →';
+    $('#readerNext').disabled = reading.saving || (index === sections.length - 1 && progress >= 100);
+    $('#readerCompleteBadge').textContent = progress >= 100 ? 'Selesai' : progress > 0 ? 'Sedang dibaca' : 'Belum selesai';
+    $('#readerCompleteBadge').className = `account-status ${progress >= 100 ? 'approved' : 'pending'}`;
+  }
+
+  async function moveReadingSection(delta) {
+    const reading = state.reading;
+    if (!reading || reading.saving) return;
+    const last = reading.sections.length - 1;
+    if (delta < 0) {
+      reading.sectionIndex = clamp(reading.sectionIndex - 1, 0, last);
+      renderReader();
+      return;
+    }
+
+    const completedThrough = reading.sectionIndex + 1;
+    const nextProgress = Math.max(reading.progress, Math.round(completedThrough / reading.sections.length * 100));
+    const completing = reading.sectionIndex === last;
+    reading.saving = true;
+    renderReader();
+    try {
+      const response = await api.saveReadingProgress({module:reading.module.name, progress:completing ? 100 : nextProgress, lastSection:completing ? last : reading.sectionIndex + 1});
+      const saved = response.progress || {module:reading.module.name,progress:completing?100:nextProgress,lastSection:completing?last:reading.sectionIndex+1};
+      upsertLocalReadingProgress(saved);
+      reading.progress = clamp(saved.progress,0,100);
+      if (!completing) reading.sectionIndex = clamp(reading.sectionIndex + 1, 0, last);
+      else toast('Modul selesai dibaca. Anda bisa lanjut ke latihan soal.', 'success');
+    } catch (error) { handleApiError(error); }
+    finally {
+      reading.saving = false;
+      renderReadingLibrary();
+      renderReader();
+      renderDashboard();
+    }
+  }
+
+  function upsertLocalReadingProgress(progress) {
+    if (!state.bootstrap) return;
+    const list = Array.isArray(state.bootstrap.readingProgress) ? state.bootstrap.readingProgress : [];
+    const key = String(progress.module || '').toUpperCase();
+    const index = list.findIndex(item => String(item.module || '').toUpperCase() === key);
+    if (index >= 0) list[index] = {...list[index], ...progress}; else list.push(progress);
+    state.bootstrap.readingProgress = list;
+    const total = (state.bootstrap.modules || []).filter(module => module.hasMaterial !== false).length;
+    const done = list.filter(item => Number(item.progress) >= 100).length;
+    state.bootstrap.summary = {...(state.bootstrap.summary || {}), totalModules:total, modulesRead:done, readingPercent:total?Math.round(done/total*100):0};
+  }
+
+  function startPracticeFromReader() {
+    if (!state.reading?.module?.name) return;
+    selectModule(state.reading.module.name);
+    navigate('practice');
   }
 
   function renderPractice() {
@@ -205,7 +413,7 @@
       return `<button class="module-card ${state.selectedModule === module.name ? 'selected' : ''}" type="button" data-module="${escapeAttr(module.name)}">
         <header><h3>${escapeHtml(module.name)}</h3><small>${Number(module.questionCount)||0} soal</small></header>
         <p>${escapeHtml(module.description || moduleDescriptions[module.name] || 'Materi promotion test')}</p>
-        <p><strong>Nilai terbaik: ${Number(progress.bestScore)||0}</strong> · ${Number(progress.attempts)||0} percobaan</p>
+        <p><strong>Nilai terbaik: ${Number(progress.bestScore)||0}</strong> · ${Number(progress.attempts)||0} percobaan · ${module.hasMaterial === false ? 'tanpa materi baca' : 'materi baca tersedia'}</p>
       </button>`;
     }).join('');
     $$('[data-module]', $('#moduleCards')).forEach(button => button.addEventListener('click', () => selectModule(button.dataset.module)));
@@ -442,17 +650,70 @@
 
   async function loadAdminDashboard() {
     if (!isAdmin()) return;
+    const refreshButton = $('#refreshAdminUsers');
+    if (refreshButton) refreshButton.disabled = true;
     try {
       const data = await api.adminDashboard();
       state.adminData = data;
-      $('#adminTotalUsers').textContent = data.summary?.totalUsers ?? 0;
+      const accounts = data.accounts || [];
+      $('#adminPendingUsers').textContent = data.summary?.pendingUsers ?? accounts.filter(user => String(user.status).toLowerCase() === 'pending').length;
+      $('#adminTotalUsers').textContent = data.summary?.totalUsers ?? accounts.length;
       $('#adminTotalAttempts').textContent = data.summary?.totalAttempts ?? 0;
       $('#adminAverageScore').textContent = data.summary?.averageScore ?? 0;
       $('#adminRemedialCount').textContent = data.summary?.remedialCount ?? 0;
+      renderAdminAccounts();
       renderAdminModuleChart(data.moduleStats || []);
       renderAdminRecommendation(data.moduleStats || []);
       renderAdminResults();
     } catch (error) { handleApiError(error); }
+    finally { if (refreshButton) refreshButton.disabled = false; }
+  }
+
+  function renderAdminAccounts() {
+    const accounts = state.adminData?.accounts || [];
+    const status = $('#adminAccountStatusFilter').value.trim().toLowerCase();
+    const query = $('#adminAccountSearch').value.trim().toLowerCase();
+    const filtered = accounts.filter(account => {
+      const accountStatus = String(account.status || (account.active ? 'approved' : 'pending')).toLowerCase();
+      const text = `${account.id} ${account.name} ${account.department} ${account.level}`.toLowerCase();
+      return (!status || accountStatus === status) && (!query || text.includes(query));
+    });
+
+    $('#adminAccountsBody').innerHTML = filtered.length ? filtered.map(account => {
+      const accountStatus = String(account.status || (account.active ? 'approved' : 'pending')).toLowerCase();
+      const actions = accountStatus === 'pending'
+        ? `<div class="account-actions"><button class="button button-primary button-small" type="button" data-account-id="${escapeAttr(account.id)}" data-account-action="approved">ACC</button><button class="button button-secondary button-small" type="button" data-account-id="${escapeAttr(account.id)}" data-account-action="rejected">Tolak</button></div>`
+        : accountStatus === 'approved'
+          ? `<button class="button button-secondary button-small" type="button" data-account-id="${escapeAttr(account.id)}" data-account-action="rejected">Cabut akses</button>`
+          : `<button class="button button-primary button-small" type="button" data-account-id="${escapeAttr(account.id)}" data-account-action="approved">Setujui</button>`;
+      return `<tr><td><strong>${escapeHtml(account.id)}</strong></td><td>${escapeHtml(account.name)}</td><td>${escapeHtml(account.department || '-')}</td><td>${escapeHtml(account.level || '-')}</td><td>${accountStatusPill(accountStatus)}</td><td>${Number(account.modulesRead)||0}</td><td>${formatDate(account.createdAt)}</td><td>${actions}</td></tr>`;
+    }).join('') : emptyRow(8, status === 'pending' ? 'Tidak ada akun yang menunggu approval.' : 'Akun tidak ditemukan.');
+
+    $$('[data-account-action]', $('#adminAccountsBody')).forEach(button => button.addEventListener('click', () => {
+      const id = button.dataset.accountId;
+      const nextStatus = button.dataset.accountAction;
+      const approve = nextStatus === 'approved';
+      showConfirm(
+        approve ? 'Setujui akun peserta?' : 'Cabut / tolak akses akun?',
+        approve ? `Akun ${id} akan dapat login dan mengakses promotion test.` : `Akun ${id} tidak akan dapat login sampai disetujui kembali.`,
+        approve ? 'Ya, ACC' : 'Ya, batasi akses',
+        () => updateAccountStatus(id, nextStatus)
+      );
+    }));
+  }
+
+  async function updateAccountStatus(id, status) {
+    try {
+      await api.adminUpdateUserStatus({ id, status });
+      toast(status === 'approved' ? `Akun ${id} berhasil di-ACC.` : `Akses akun ${id} dibatasi.`, 'success');
+      await loadAdminDashboard();
+    } catch (error) { handleApiError(error); }
+  }
+
+  function accountStatusPill(status) {
+    const normalized = String(status || 'pending').toLowerCase();
+    const label = normalized === 'approved' ? 'Disetujui' : normalized === 'rejected' ? 'Ditolak' : 'Menunggu';
+    return `<span class="account-status ${escapeAttr(normalized)}">${label}</span>`;
   }
 
   function renderAdminModuleChart(stats) {
@@ -502,7 +763,7 @@
 
   function confirmLogout() {
     showConfirm('Keluar dari aplikasi?', 'Sesi Anda akan diakhiri pada perangkat ini.', 'Keluar', async () => {
-      await api.logout(); state.user=null; state.bootstrap=null; location.hash=''; showLogin();
+      await api.logout(); state.user=null; state.bootstrap=null; state.reading=null; location.hash=''; showLogin();
     });
   }
 
@@ -533,7 +794,7 @@
   }
 
   function handleFatalSessionError(error) {
-    api.clearSession(); state.user=null; state.bootstrap=null; showLogin();
+    api.clearSession(); state.user=null; state.bootstrap=null; state.reading=null; showLogin();
     toast(error.message || 'Sesi tidak valid. Silakan login kembali.', 'error');
   }
 
@@ -542,12 +803,18 @@
     toast(error?.message || 'Terjadi kesalahan. Silakan coba lagi.', 'error');
   }
 
-  function togglePassword() {
-    const input = $('#password'); input.type = input.type === 'password' ? 'text' : 'password';
-    $('#togglePassword').setAttribute('aria-label', input.type === 'password' ? 'Tampilkan password' : 'Sembunyikan password');
+  function togglePassword() { togglePasswordField('#password', '#togglePassword'); }
+  function togglePasswordField(inputSelector, buttonSelector) {
+    const input = $(inputSelector); const button = $(buttonSelector);
+    if (!input || !button) return;
+    input.type = input.type === 'password' ? 'text' : 'password';
+    const hidden = input.type === 'password';
+    button.textContent = hidden ? 'Lihat' : 'Sembunyikan';
+    button.setAttribute('aria-label', hidden ? 'Tampilkan password' : 'Sembunyikan password');
   }
 
   function clearLoginErrors() { $('#employeeIdError').textContent=''; $('#passwordError').textContent=''; }
+  function clearRegisterErrors() { ['registerId','registerName','registerDepartment','registerLevel','registerPassword','registerPasswordConfirm','registerConsent'].forEach(id => { const el=$(`#${id}Error`); if(el) el.textContent=''; }); }
   function setButtonLoading(button, loading) { button.disabled=loading; $('.button-label',button)?.classList.toggle('hidden',loading); $('.spinner',button)?.classList.toggle('hidden',!loading); }
   function isAdmin() { return String(state.user?.role || '').toLowerCase() === 'admin'; }
   function firstName(name) { return String(name || 'Peserta').trim().split(/\s+/)[0]; }

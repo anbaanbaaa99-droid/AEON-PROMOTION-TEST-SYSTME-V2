@@ -1,4 +1,4 @@
-const CACHE = 'aeon-promotion-test-v2';
+const CACHE = 'aeon-promotion-test-v5';
 const ASSETS = ['./','index.html','manifest.webmanifest','assets/icon.svg','assets/css/style.css','assets/js/config.js','assets/js/api.js','assets/js/app.js'];
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting())));
 self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim())));

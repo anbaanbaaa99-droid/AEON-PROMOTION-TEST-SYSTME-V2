@@ -1,226 +1,250 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#8f005b">
-  <meta name="description" content="Platform latihan dan evaluasi Promotion Test AEON.">
-  <title>AEON Promotion Test</title>
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/css/style.css">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<meta content="#8f005b" name="theme-color"/>
+<meta content="Platform baca modul, latihan, dan evaluasi Promotion Test AEON." name="description"/>
+<title>AEON Promotion Test</title>
+<link href="manifest.webmanifest" rel="manifest"/>
+<link href="assets/icon.svg" rel="icon" type="image/svg+xml"/>
+<link href="assets/css/style.css" rel="stylesheet"/>
 </head>
 <body>
-  <a class="skip-link" href="#mainContent">Lewati ke konten</a>
-
-  <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></div>
-
-  <header class="topbar hidden" id="appHeader">
-    <a class="brand" href="#/dashboard" aria-label="AEON Promotion Test">
-      <span class="brand-mark">A</span>
-      <span><strong>AEON</strong><small>Promotion Test</small></span>
-    </a>
-    <div class="topbar-actions">
-      <button class="icon-button" id="themeToggle" type="button" aria-label="Ubah tema" title="Ubah tema">◐</button>
-      <div class="user-chip">
-        <span class="avatar" id="userAvatar">U</span>
-        <span class="user-chip-text"><strong id="headerUserName">Peserta</strong><small id="headerUserRole">User</small></span>
-      </div>
-      <button class="button button-ghost button-small" id="logoutButton" type="button">Keluar</button>
-    </div>
-  </header>
-
-  <main id="mainContent">
-    <section id="loginView" class="auth-layout view">
-      <div class="auth-hero">
-        <div class="hero-overlay"></div>
-        <div class="auth-hero-content">
-          <div class="eyebrow">LEARNING &amp; EVALUATION PLATFORM</div>
-          <h1>Siap naik level dalam karier?</h1>
-          <p>Latihan terarah, hasil langsung, dan rekomendasi materi yang perlu dikuasai.</p>
-          <div class="hero-points">
-            <span>✓ Mobile friendly</span>
-            <span>✓ Soal acak &amp; timer</span>
-            <span>✓ Monitoring trainer</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="auth-panel">
-        <div class="login-card">
-          <div class="brand brand-login">
-            <span class="brand-mark">A</span>
-            <span><strong>AEON</strong><small>Promotion Test</small></span>
-          </div>
-          <div>
-            <p class="eyebrow">SELAMAT DATANG</p>
-            <h2>Masuk ke akun Anda</h2>
-            <p class="muted">Gunakan Employee ID dan password yang diberikan trainer.</p>
-          </div>
-
-          <form id="loginForm" novalidate>
-            <label class="field">
-              <span>Employee ID</span>
-              <input id="employeeId" name="employeeId" autocomplete="username" required placeholder="Contoh: 001">
-              <small class="field-error" id="employeeIdError"></small>
-            </label>
-            <label class="field">
-              <span>Password</span>
-              <span class="password-wrap">
-                <input id="password" name="password" type="password" autocomplete="current-password" required minlength="5" placeholder="Masukkan password">
-                <button id="togglePassword" class="password-toggle" type="button" aria-label="Tampilkan password">👁</button>
-              </span>
-              <small class="field-error" id="passwordError"></small>
-            </label>
-            <button id="loginButton" class="button button-primary button-block" type="submit">
-              <span class="button-label">Masuk</span><span class="spinner hidden" aria-hidden="true"></span>
-            </button>
-          </form>
-
-          <div class="demo-box" id="demoCredentials">
-            <strong>Mode demo aktif</strong>
-            <span>Peserta: <code>001</code> / <code>12345</code></span>
-            <span>Trainer: <code>ADMIN</code> / <code>admin123</code></span>
-          </div>
-          <p class="login-footer">Data akun dan hasil ujian dikelola oleh tim training.</p>
-        </div>
-      </div>
-    </section>
-
-    <section id="dashboardView" class="app-shell view hidden">
-      <aside class="sidebar" id="sidebar">
-        <nav aria-label="Navigasi utama">
-          <a href="#/dashboard" data-route-link="dashboard" class="nav-link active"><span>⌂</span> Dashboard</a>
-          <a href="#/practice" data-route-link="practice" class="nav-link"><span>▣</span> Latihan</a>
-          <a href="#/history" data-route-link="history" class="nav-link"><span>◷</span> Riwayat</a>
-          <a href="#/admin" data-route-link="admin" class="nav-link admin-only hidden"><span>▤</span> Monitoring</a>
-        </nav>
-        <div class="sidebar-help">
-          <strong>Butuh bantuan?</strong>
-          <p>Hubungi trainer bila akun atau soal mengalami kendala.</p>
-        </div>
-      </aside>
-
-      <div class="content-area">
-        <section id="dashboardPage" class="page-section">
-          <div class="page-heading">
-            <div><p class="eyebrow">RINGKASAN BELAJAR</p><h1 id="dashboardGreeting">Selamat datang</h1><p class="muted">Lanjutkan progres dan tingkatkan modul yang nilainya masih rendah.</p></div>
-            <button class="button button-primary" id="startPracticeButton" type="button">Mulai latihan</button>
-          </div>
-
-          <div class="stat-grid" id="userStats">
-            <article class="stat-card"><span class="stat-icon">◎</span><div><small>Rata-rata nilai</small><strong id="averageScore">0</strong></div></article>
-            <article class="stat-card"><span class="stat-icon">★</span><div><small>Nilai terbaik</small><strong id="bestScore">0</strong></div></article>
-            <article class="stat-card"><span class="stat-icon">✓</span><div><small>Tes selesai</small><strong id="attemptCount">0</strong></div></article>
-            <article class="stat-card"><span class="stat-icon">↗</span><div><small>Status kesiapan</small><strong id="readinessStatus">Belum ada data</strong></div></article>
-          </div>
-
-          <div class="dashboard-grid">
-            <article class="panel panel-wide">
-              <div class="panel-heading"><div><h2>Progress per modul</h2><p class="muted">Nilai terbaik dari setiap modul.</p></div><span class="legend"><i></i> Target 75</span></div>
-              <div id="moduleProgress" class="module-progress-list skeleton-block"></div>
-            </article>
-            <article class="panel">
-              <div class="panel-heading"><div><h2>Rekomendasi</h2><p class="muted">Fokus belajar berikutnya.</p></div></div>
-              <div id="recommendationCard" class="recommendation-card skeleton-block"></div>
-            </article>
-          </div>
-
-          <article class="panel">
-            <div class="panel-heading"><div><h2>Aktivitas terbaru</h2><p class="muted">Tiga hasil terakhir Anda.</p></div><a href="#/history" class="text-link">Lihat semua</a></div>
-            <div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Modul</th><th>Nilai</th><th>Grade</th></tr></thead><tbody id="recentResultsBody"></tbody></table></div>
-          </article>
-        </section>
-
-        <section id="practicePage" class="page-section hidden">
-          <div class="page-heading"><div><p class="eyebrow">PILIH MATERI</p><h1>Latihan promotion test</h1><p class="muted">Pilih modul, jumlah soal, dan durasi sebelum mulai.</p></div></div>
-          <div class="practice-layout">
-            <article class="panel">
-              <h2>Modul tersedia</h2>
-              <div id="moduleCards" class="module-card-grid"></div>
-            </article>
-            <article class="panel exam-settings">
-              <h2>Pengaturan latihan</h2>
-              <label class="field"><span>Modul terpilih</span><input id="selectedModuleDisplay" readonly value="Belum dipilih"></label>
-              <label class="field"><span>Jumlah soal</span><select id="questionCount"><option value="5">5 soal</option><option value="10" selected>10 soal</option><option value="15">15 soal</option><option value="20">20 soal</option></select></label>
-              <label class="field"><span>Durasi</span><select id="durationMinutes"><option value="10">10 menit</option><option value="20" selected>20 menit</option><option value="30">30 menit</option><option value="60">60 menit</option></select></label>
-              <label class="check-row"><input id="shuffleAnswers" type="checkbox" checked><span>Acak urutan pilihan jawaban</span></label>
-              <button id="beginQuizButton" class="button button-primary button-block" type="button" disabled>Mulai sekarang</button>
-              <p class="fine-print">Jawaban akan dinilai oleh server. Pastikan koneksi internet stabil sebelum memulai.</p>
-            </article>
-          </div>
-        </section>
-
-        <section id="historyPage" class="page-section hidden">
-          <div class="page-heading"><div><p class="eyebrow">HASIL BELAJAR</p><h1>Riwayat ujian</h1><p class="muted">Pantau perkembangan nilai dari waktu ke waktu.</p></div><button id="exportMyHistory" class="button button-secondary" type="button">Ekspor CSV</button></div>
-          <article class="panel">
-            <div class="filter-row"><label class="field compact"><span>Filter modul</span><select id="historyModuleFilter"><option value="">Semua modul</option></select></label><label class="field compact"><span>Cari</span><input id="historySearch" placeholder="Cari modul atau grade"></label></div>
-            <div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Modul</th><th>Benar</th><th>Nilai</th><th>Durasi</th><th>Grade</th></tr></thead><tbody id="historyTableBody"></tbody></table></div>
-          </article>
-        </section>
-
-        <section id="adminPage" class="page-section hidden">
-          <div class="page-heading"><div><p class="eyebrow">TRAINER MONITORING</p><h1>Dashboard evaluasi</h1><p class="muted">Identifikasi peserta dan modul yang memerlukan tindak lanjut.</p></div><button id="exportAdminReport" class="button button-secondary" type="button">Ekspor laporan</button></div>
-          <div class="stat-grid">
-            <article class="stat-card"><span class="stat-icon">♙</span><div><small>Total peserta</small><strong id="adminTotalUsers">0</strong></div></article>
-            <article class="stat-card"><span class="stat-icon">✓</span><div><small>Total percobaan</small><strong id="adminTotalAttempts">0</strong></div></article>
-            <article class="stat-card"><span class="stat-icon">◎</span><div><small>Rata-rata nilai</small><strong id="adminAverageScore">0</strong></div></article>
-            <article class="stat-card"><span class="stat-icon">!</span><div><small>Perlu remedial</small><strong id="adminRemedialCount">0</strong></div></article>
-          </div>
-          <div class="dashboard-grid">
-            <article class="panel panel-wide"><div class="panel-heading"><div><h2>Rata-rata per modul</h2><p class="muted">Perbandingan performa seluruh peserta.</p></div></div><div id="adminModuleChart" class="bar-chart"></div></article>
-            <article class="panel"><div class="panel-heading"><div><h2>Prioritas evaluasi</h2><p class="muted">Modul dengan capaian terendah.</p></div></div><div id="adminRecommendation"></div></article>
-          </div>
-          <article class="panel">
-            <div class="panel-heading"><div><h2>Hasil peserta</h2><p class="muted">Gunakan filter untuk menemukan peserta yang membutuhkan remedial.</p></div></div>
-            <div class="filter-row"><label class="field compact"><span>Modul</span><select id="adminModuleFilter"><option value="">Semua modul</option></select></label><label class="field compact"><span>Status</span><select id="adminStatusFilter"><option value="">Semua status</option><option value="remedial">Perlu remedial</option><option value="passed">Lulus</option></select></label><label class="field compact"><span>Cari peserta</span><input id="adminSearch" placeholder="Nama, ID, departemen"></label></div>
-            <div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>ID</th><th>Nama</th><th>Departemen</th><th>Modul</th><th>Nilai</th><th>Grade</th></tr></thead><tbody id="adminResultsBody"></tbody></table></div>
-          </article>
-        </section>
-      </div>
-    </section>
-
-    <section id="quizView" class="quiz-layout view hidden">
-      <header class="quiz-header">
-        <div class="brand"><span class="brand-mark">A</span><span><strong>AEON</strong><small id="quizModuleLabel">Promotion Test</small></span></div>
-        <div class="quiz-header-center"><span id="quizCounter">Soal 1/10</span><div class="quiz-progress-track"><span id="quizProgressBar"></span></div></div>
-        <div class="timer" id="timerBox" aria-live="polite"><span>◷</span><strong id="timerDisplay">20:00</strong></div>
-      </header>
-      <div class="quiz-body">
-        <aside class="question-palette-panel">
-          <h3>Navigasi soal</h3><div id="questionPalette" class="question-palette"></div>
-          <div class="palette-legend"><span><i class="answered"></i> Dijawab</span><span><i class="current"></i> Aktif</span><span><i></i> Belum</span></div>
-          <button id="finishQuizAside" class="button button-danger button-block" type="button">Selesaikan ujian</button>
-        </aside>
-        <section class="question-panel">
-          <div class="question-meta"><span class="badge" id="questionLevel">Easy</span><button id="readQuestionButton" class="button button-ghost button-small" type="button">🔊 Bacakan soal</button></div>
-          <h1 id="questionText">Memuat soal...</h1>
-          <div id="answerOptions" class="answer-options" role="radiogroup" aria-label="Pilihan jawaban"></div>
-          <div class="quiz-navigation"><button id="previousQuestion" class="button button-secondary" type="button">← Sebelumnya</button><label class="check-row flag-check"><input id="flagQuestion" type="checkbox"><span>Tandai untuk ditinjau</span></label><button id="nextQuestion" class="button button-primary" type="button">Berikutnya →</button></div>
-          <p class="keyboard-hint">Tip: tekan tombol 1–4 untuk memilih jawaban dan ← → untuk berpindah soal.</p>
-        </section>
-      </div>
-    </section>
-
-    <section id="resultView" class="result-layout view hidden">
-      <div class="result-card">
-        <div id="resultStatusIcon" class="result-icon">✓</div>
-        <p class="eyebrow">HASIL UJIAN</p><h1 id="resultHeadline">Latihan selesai</h1><p id="resultMessage" class="muted">Berikut hasil Anda.</p>
-        <div class="score-ring" id="scoreRing"><strong id="resultScore">0</strong><small>/100</small></div>
-        <div class="result-stats"><div><small>Jawaban benar</small><strong id="resultCorrect">0/0</strong></div><div><small>Durasi</small><strong id="resultDuration">00:00</strong></div><div><small>Grade</small><strong id="resultGrade">-</strong></div></div>
-        <div id="resultRecommendation" class="result-recommendation"></div>
-        <div class="result-actions"><button id="reviewAnswersButton" class="button button-secondary" type="button">Tinjau jawaban</button><button id="backDashboardButton" class="button button-primary" type="button">Kembali ke dashboard</button></div>
-      </div>
-      <article id="answerReviewPanel" class="review-panel hidden"><div class="panel-heading"><div><h2>Pembahasan jawaban</h2><p class="muted">Pelajari alasan dari setiap jawaban.</p></div><button id="closeReviewButton" class="icon-button" type="button" aria-label="Tutup pembahasan">×</button></div><div id="answerReviewList"></div></article>
-    </section>
-  </main>
-
-  <dialog id="confirmDialog" class="confirm-dialog">
-    <form method="dialog"><h2 id="confirmTitle">Konfirmasi</h2><p id="confirmMessage">Apakah Anda yakin?</p><div class="dialog-actions"><button class="button button-secondary" value="cancel">Batal</button><button class="button button-danger" id="confirmAction" value="confirm">Ya, lanjutkan</button></div></form>
-  </dialog>
-
-  <script src="assets/js/config.js"></script>
-  <script src="assets/js/api.js"></script>
-  <script src="assets/js/app.js"></script>
+<a class="skip-link" href="#mainContent">Lewati ke konten</a>
+<div aria-atomic="true" aria-live="polite" class="toast-region" id="toastRegion"></div>
+<header class="topbar hidden" id="appHeader">
+<a aria-label="AEON Promotion Test" class="brand" href="#/dashboard">
+<span class="brand-mark">A</span>
+<span><strong>AEON</strong><small>Promotion Test</small></span>
+</a>
+<div class="topbar-actions">
+<button aria-label="Ubah tema" class="icon-button" id="themeToggle" title="Ubah tema" type="button">◐</button>
+<div class="user-chip">
+<span class="avatar" id="userAvatar">U</span>
+<span class="user-chip-text"><strong id="headerUserName">Peserta</strong><small id="headerUserRole">User</small></span>
+</div>
+<button class="button button-ghost button-small" id="logoutButton" type="button">Keluar</button>
+</div>
+</header>
+<main id="mainContent">
+<section class="auth-layout view" id="loginView">
+<div class="auth-hero">
+<div class="hero-overlay"></div>
+<div class="auth-hero-content">
+<div class="eyebrow">LEARNING &amp; EVALUATION PLATFORM</div>
+<h1>Baca. Pahami. Latih. Naik level.</h1>
+<p>Satu platform untuk membaca materi promotion test, menyimpan progres, dan langsung menguji pemahaman lewat latihan soal.</p>
+<div class="hero-points">
+<span>✓ Modul baca terstruktur</span>
+<span>✓ Latihan soal per modul</span>
+<span>✓ Progress &amp; monitoring admin</span>
+</div>
+</div>
+</div>
+<div class="auth-panel"><div class="auth-card">
+<div class="brand brand-login">
+<span class="brand-mark">A</span>
+<span><strong>AEON</strong><small>Learning &amp; Promotion Test</small></span>
+</div>
+<div aria-label="Akun" class="auth-tabs" role="tablist">
+<button aria-selected="true" class="auth-tab active" data-auth-mode="login" id="loginTab" role="tab" type="button">Masuk</button>
+<button aria-selected="false" class="auth-tab" data-auth-mode="register" id="registerTab" role="tab" type="button">Daftar akun</button>
+</div>
+<section class="auth-form-panel" id="loginPanel">
+<div class="auth-heading">
+<p class="eyebrow">SELAMAT DATANG</p>
+<h2>Masuk ke akun Anda</h2>
+<p class="muted">Peserta yang sudah disetujui admin dapat mengakses modul baca, latihan soal, dan riwayat nilai.</p>
+</div>
+<form id="loginForm" novalidate="">
+<label class="field"><span>ID Peserta</span><input autocomplete="username" id="employeeId" name="employeeId" placeholder="Contoh: AEON-JORDAN01" required=""/><small class="field-error" id="employeeIdError"></small></label>
+<label class="field"><span>Password</span><span class="password-wrap"><input autocomplete="current-password" id="password" minlength="6" name="password" placeholder="Masukkan password" required="" type="password"/><button aria-label="Tampilkan password" class="password-toggle" id="togglePassword" type="button">👁</button></span><small class="field-error" id="passwordError"></small></label>
+<button class="button button-primary button-block" id="loginButton" type="submit"><span class="button-label">Masuk</span><span aria-hidden="true" class="spinner hidden"></span></button>
+</form>
+<div class="demo-box" id="demoCredentials"><strong>Mode demo aktif</strong><span>Peserta: <code>001</code> / <code>12345</code></span><span>Admin: <code>ADMIN</code> / <code>admin123</code></span></div>
+</section>
+<section class="auth-form-panel hidden" id="registerPanel">
+<div class="auth-heading">
+<p class="eyebrow">REGISTRASI PESERTA</p>
+<h2>Buat ID sendiri</h2>
+<p class="muted">Setelah registrasi, akun berstatus <strong>menunggu approval</strong>. Anda baru bisa masuk setelah admin menyetujui akun.</p>
+</div>
+<form id="registerForm" novalidate="">
+<div class="field-grid two">
+<label class="field"><span>ID Peserta</span><input autocomplete="username" id="registerId" maxlength="30" placeholder="Contoh: AEON-JORDAN01"/><small class="field-error" id="registerIdError"></small></label>
+<label class="field"><span>Level / Jabatan</span><input id="registerLevel" maxlength="50" placeholder="Contoh: JO / Staff"/><small class="field-error"></small></label>
+</div>
+<label class="field"><span>Nama lengkap</span><input autocomplete="name" id="registerName" maxlength="100" placeholder="Nama sesuai data peserta"/><small class="field-error" id="registerNameError"></small></label>
+<label class="field"><span>Departemen / Divisi</span><input id="registerDepartment" maxlength="80" placeholder="Contoh: Store Operation"/><small class="field-error" id="registerDepartmentError"></small></label>
+<div class="field-grid two">
+<label class="field"><span>Password</span><span class="password-wrap"><input autocomplete="new-password" id="registerPassword" minlength="6" placeholder="Minimal 6 karakter" type="password"/><button aria-label="Tampilkan password" class="password-toggle" id="toggleRegisterPassword" type="button">👁</button></span><small class="field-error" id="registerPasswordError"></small></label>
+<label class="field"><span>Ulangi password</span><input autocomplete="new-password" id="registerPasswordConfirm" minlength="6" placeholder="Ketik ulang password" type="password"/><small class="field-error" id="registerPasswordConfirmError"></small></label>
+</div>
+<label class="check-row"><input id="registerConsent" type="checkbox"/><span>Saya memastikan data yang saya isi benar.</span></label><small class="field-error" id="registerConsentError"></small>
+<button class="button button-primary button-block" id="registerButton" type="submit"><span class="button-label">Kirim permintaan akun</span><span aria-hidden="true" class="spinner hidden"></span></button>
+</form>
+<div class="registration-success hidden" id="registrationSuccess"><span class="success-mark">✓</span><div><strong>Registrasi terkirim</strong><p id="registrationSuccessText"></p></div></div>
+</section>
+<p class="login-footer">Akses peserta dikendalikan oleh admin/trainer.</p>
+</div></div>
+</section>
+<section class="app-shell view hidden" id="dashboardView">
+<aside class="sidebar" id="sidebar">
+<nav aria-label="Navigasi utama">
+<a class="nav-link active" data-route-link="dashboard" href="#/dashboard"><span>01</span> Dashboard</a><a class="nav-link" data-route-link="modules" href="#/modules"><span>02</span> Baca Modul</a>
+<a class="nav-link" data-route-link="practice" href="#/practice"><span>03</span> Latihan</a>
+<a class="nav-link" data-route-link="history" href="#/history"><span>04</span> Riwayat</a>
+<a class="nav-link admin-only hidden" data-route-link="admin" href="#/admin"><span>05</span> Monitoring</a>
+</nav>
+<div class="sidebar-help">
+<strong>Butuh bantuan?</strong>
+<p>Hubungi trainer bila akun atau soal mengalami kendala.</p>
+</div>
+</aside>
+<div class="content-area">
+<section class="page-section" id="dashboardPage">
+<div class="page-heading">
+<div><p class="eyebrow">RINGKASAN BELAJAR</p><h1 id="dashboardGreeting">Selamat datang</h1><p class="muted">Lanjutkan progres dan tingkatkan modul yang nilainya masih rendah.</p></div>
+<button class="button button-primary" id="startPracticeButton" type="button">Mulai latihan</button>
+</div>
+<div class="stat-grid" id="userStats">
+<article class="stat-card"><span class="stat-icon">◎</span><div><small>Rata-rata nilai</small><strong id="averageScore">0</strong></div></article>
+<article class="stat-card"><span class="stat-icon">★</span><div><small>Nilai terbaik</small><strong id="bestScore">0</strong></div></article>
+<article class="stat-card"><span class="stat-icon">✓</span><div><small>Tes selesai</small><strong id="attemptCount">0</strong></div></article>
+<article class="stat-card"><span class="stat-icon">↗</span><div><small>Status kesiapan</small><strong id="readinessStatus">Belum ada data</strong></div></article>
+</div>
+<div class="dashboard-grid">
+<article class="panel panel-wide">
+<div class="panel-heading"><div><h2>Progress per modul</h2><p class="muted">Nilai terbaik dari setiap modul.</p></div><span class="legend"><i></i> Target 75</span></div>
+<div class="module-progress-list skeleton-block" id="moduleProgress"></div>
+</article>
+<article class="panel">
+<div class="panel-heading"><div><h2>Rekomendasi</h2><p class="muted">Fokus belajar berikutnya.</p></div></div>
+<div class="recommendation-card skeleton-block" id="recommendationCard"></div>
+</article>
+</div>
+<article class="panel learning-journey" id="readingJourney">
+<div class="panel-heading"><div><p class="panel-number">02 / READ</p><h2>Progress baca modul</h2><p class="muted">Selesaikan materi terlebih dahulu, lalu uji pemahaman melalui latihan soal.</p></div><button class="button button-secondary button-small" id="startReadingButton" type="button">Buka modul</button></div>
+<div class="journey-row"><div><strong id="dashboardReadingCompleted">0/0</strong><span>modul selesai dibaca</span></div><div class="reading-progress-track"><span id="dashboardReadingProgressBar"></span></div><strong id="dashboardReadingPercent">0%</strong></div>
+</article><article class="panel">
+<div class="panel-heading"><div><h2>Aktivitas terbaru</h2><p class="muted">Tiga hasil terakhir Anda.</p></div><a class="text-link" href="#/history">Lihat semua</a></div>
+<div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Modul</th><th>Nilai</th><th>Grade</th></tr></thead><tbody id="recentResultsBody"></tbody></table></div>
+</article>
+</section>
+<section class="page-section hidden" id="modulesPage">
+<div class="page-heading editorial-heading"><div><p class="section-index">02 / LEARNING LIBRARY</p><h1>Baca modul.<br/>Pahami inti.</h1><p class="muted">Pilih modul, baca materi per bagian, simpan progres, lalu lanjutkan ke latihan soal yang sesuai.</p></div></div>
+<div class="reading-overview">
+<article class="reading-overview-card"><small>Progress baca</small><strong id="readingOverallPercent">0%</strong><div class="reading-progress-track"><span id="readingOverallBar"></span></div></article>
+<article class="reading-overview-card"><small>Modul selesai</small><strong id="readingCompletedCount">0/0</strong><span class="muted">Tersimpan di akun Anda</span></article>
+</div>
+<div class="reading-layout">
+<aside class="panel reading-library-panel">
+<div class="panel-heading"><div><p class="panel-number">LIBRARY</p><h2>Daftar modul</h2></div></div>
+<div class="reading-module-list" id="readingModuleList"></div>
+</aside>
+<article class="panel module-reader" id="moduleReader">
+<div class="reading-empty" id="readingEmpty"><span class="reading-empty-mark">A</span><h2>Pilih modul untuk mulai membaca</h2><p>Progress bacaan akan tersimpan sehingga Anda bisa melanjutkan dari bagian terakhir.</p></div>
+<div class="hidden" id="readerContent">
+<header class="reader-header">
+<div><p class="eyebrow" id="readerModuleCode">MODULE</p><h2 id="readerTitle">Judul modul</h2><p class="muted" id="readerSummary"></p></div>
+<div class="reader-meta"><span id="readerMinutes">± 0 menit</span><span class="account-status pending" id="readerCompleteBadge">Belum selesai</span><a id="readerSourcePdf" class="button button-secondary button-small hidden" href="#" target="_blank" rel="noopener">Buka PDF asli ↗</a></div>
+</header>
+<div class="reader-progress"><div class="reading-progress-track"><span id="readerProgressBar"></span></div><strong id="readerProgressText">0%</strong></div>
+<div class="reader-section-nav"><span id="readerSectionIndex">Bagian 1/1</span></div>
+<section class="reader-article"><h3 id="readerSectionTitle"></h3><div class="reader-body" id="readerSectionBody"></div><ul class="reader-bullets" id="readerSectionBullets"></ul></section>
+<footer class="reader-actions"><button class="button button-secondary" id="readerPrevious" type="button">← Sebelumnya</button><button class="button button-ghost" id="readerPracticeButton" type="button">Latihan soal modul ini</button><button class="button button-primary" id="readerNext" type="button">Berikutnya →</button></footer>
+</div>
+</article>
+</div>
+</section><section class="page-section hidden" id="practicePage">
+<div class="page-heading"><div><p class="eyebrow">PILIH MATERI</p><h1>Latihan promotion test</h1><p class="muted">Pilih modul, jumlah soal, dan durasi sebelum mulai.</p></div></div>
+<div class="practice-layout">
+<article class="panel">
+<h2>Modul tersedia</h2>
+<div class="module-card-grid" id="moduleCards"></div>
+</article>
+<article class="panel exam-settings">
+<h2>Pengaturan latihan</h2>
+<label class="field"><span>Modul terpilih</span><input id="selectedModuleDisplay" readonly="" value="Belum dipilih"/></label>
+<label class="field"><span>Jumlah soal</span><select id="questionCount"><option value="5">5 soal</option><option selected="" value="10">10 soal</option><option value="15">15 soal</option><option value="20">20 soal</option></select></label>
+<label class="field"><span>Durasi</span><select id="durationMinutes"><option value="10">10 menit</option><option selected="" value="20">20 menit</option><option value="30">30 menit</option><option value="60">60 menit</option></select></label>
+<label class="check-row"><input checked="" id="shuffleAnswers" type="checkbox"/><span>Acak urutan pilihan jawaban</span></label>
+<button class="button button-primary button-block" disabled="" id="beginQuizButton" type="button">Mulai sekarang</button>
+<p class="fine-print">Jawaban akan dinilai oleh server. Pastikan koneksi internet stabil sebelum memulai.</p>
+</article>
+</div>
+</section>
+<section class="page-section hidden" id="historyPage">
+<div class="page-heading"><div><p class="eyebrow">HASIL BELAJAR</p><h1>Riwayat ujian</h1><p class="muted">Pantau perkembangan nilai dari waktu ke waktu.</p></div><button class="button button-secondary" id="exportMyHistory" type="button">Ekspor CSV</button></div>
+<article class="panel">
+<div class="filter-row"><label class="field compact"><span>Filter modul</span><select id="historyModuleFilter"><option value="">Semua modul</option></select></label><label class="field compact"><span>Cari</span><input id="historySearch" placeholder="Cari modul atau grade"/></label></div>
+<div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Modul</th><th>Benar</th><th>Nilai</th><th>Durasi</th><th>Grade</th></tr></thead><tbody id="historyTableBody"></tbody></table></div>
+</article>
+</section>
+<section class="page-section hidden" id="adminPage">
+<div class="page-heading"><div><p class="eyebrow">TRAINER MONITORING</p><h1>Dashboard evaluasi</h1><p class="muted">Identifikasi peserta dan modul yang memerlukan tindak lanjut.</p></div><button class="button button-secondary" id="exportAdminReport" type="button">Ekspor laporan</button></div>
+<div class="stat-grid">
+<article class="stat-card"><span class="stat-icon">♙</span><div><small>Total peserta</small><strong id="adminTotalUsers">0</strong></div></article>
+<article class="stat-card"><span class="stat-icon">✓</span><div><small>Total percobaan</small><strong id="adminTotalAttempts">0</strong></div></article>
+<article class="stat-card"><span class="stat-icon">◎</span><div><small>Rata-rata nilai</small><strong id="adminAverageScore">0</strong></div></article>
+<article class="stat-card"><span class="stat-icon">!</span><div><small>Perlu remedial</small><strong id="adminRemedialCount">0</strong></div></article>
+</div><article class="panel approval-panel">
+<div class="panel-heading"><div><p class="panel-number">ACCOUNT ACCESS</p><h2>Approval akun peserta</h2><p class="muted">Akun baru tidak dapat login sebelum disetujui admin.</p></div><div><span class="mini-stat">Menunggu <strong id="adminPendingUsers">0</strong></span> <button class="button button-secondary button-small" id="refreshAdminUsers" type="button">Refresh</button></div></div>
+<div class="filter-row"><label class="field compact"><span>Status akun</span><select id="adminAccountStatusFilter"><option value="">Semua status</option><option value="pending">Menunggu</option><option value="approved">Disetujui</option><option value="rejected">Ditolak</option></select></label><label class="field compact"><span>Cari akun</span><input id="adminAccountSearch" placeholder="ID, nama, departemen"/></label></div>
+<div class="table-wrap"><table><thead><tr><th>ID</th><th>Nama</th><th>Departemen</th><th>Level</th><th>Status</th><th>Modul Dibaca</th><th>Dibuat</th><th>Aksi</th></tr></thead><tbody id="adminAccountsBody"></tbody></table></div>
+</article>
+<div class="dashboard-grid">
+<article class="panel panel-wide"><div class="panel-heading"><div><h2>Rata-rata per modul</h2><p class="muted">Perbandingan performa seluruh peserta.</p></div></div><div class="bar-chart" id="adminModuleChart"></div></article>
+<article class="panel"><div class="panel-heading"><div><h2>Prioritas evaluasi</h2><p class="muted">Modul dengan capaian terendah.</p></div></div><div id="adminRecommendation"></div></article>
+</div>
+<article class="panel">
+<div class="panel-heading"><div><h2>Hasil peserta</h2><p class="muted">Gunakan filter untuk menemukan peserta yang membutuhkan remedial.</p></div></div>
+<div class="filter-row"><label class="field compact"><span>Modul</span><select id="adminModuleFilter"><option value="">Semua modul</option></select></label><label class="field compact"><span>Status</span><select id="adminStatusFilter"><option value="">Semua status</option><option value="remedial">Perlu remedial</option><option value="passed">Lulus</option></select></label><label class="field compact"><span>Cari peserta</span><input id="adminSearch" placeholder="Nama, ID, departemen"/></label></div>
+<div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>ID</th><th>Nama</th><th>Departemen</th><th>Modul</th><th>Nilai</th><th>Grade</th></tr></thead><tbody id="adminResultsBody"></tbody></table></div>
+</article>
+</section>
+</div>
+</section>
+<section class="quiz-layout view hidden" id="quizView">
+<header class="quiz-header">
+<div class="brand"><span class="brand-mark">A</span><span><strong>AEON</strong><small id="quizModuleLabel">Promotion Test</small></span></div>
+<div class="quiz-header-center"><span id="quizCounter">Soal 1/10</span><div class="quiz-progress-track"><span id="quizProgressBar"></span></div></div>
+<div aria-live="polite" class="timer" id="timerBox"><span>◷</span><strong id="timerDisplay">20:00</strong></div>
+</header>
+<div class="quiz-body">
+<aside class="question-palette-panel">
+<h3>Navigasi soal</h3><div class="question-palette" id="questionPalette"></div>
+<div class="palette-legend"><span><i class="answered"></i> Dijawab</span><span><i class="current"></i> Aktif</span><span><i></i> Belum</span></div>
+<button class="button button-danger button-block" id="finishQuizAside" type="button">Selesaikan ujian</button>
+</aside>
+<section class="question-panel">
+<div class="question-meta"><span class="badge" id="questionLevel">Easy</span><button class="button button-ghost button-small" id="readQuestionButton" type="button">🔊 Bacakan soal</button></div>
+<h1 id="questionText">Memuat soal...</h1>
+<div aria-label="Pilihan jawaban" class="answer-options" id="answerOptions" role="radiogroup"></div>
+<div class="quiz-navigation"><button class="button button-secondary" id="previousQuestion" type="button">← Sebelumnya</button><label class="check-row flag-check"><input id="flagQuestion" type="checkbox"/><span>Tandai untuk ditinjau</span></label><button class="button button-primary" id="nextQuestion" type="button">Berikutnya →</button></div>
+<p class="keyboard-hint">Tip: tekan tombol 1–4 untuk memilih jawaban dan ← → untuk berpindah soal.</p>
+</section>
+</div>
+</section>
+<section class="result-layout view hidden" id="resultView">
+<div class="result-card">
+<div class="result-icon" id="resultStatusIcon">✓</div>
+<p class="eyebrow">HASIL UJIAN</p><h1 id="resultHeadline">Latihan selesai</h1><p class="muted" id="resultMessage">Berikut hasil Anda.</p>
+<div class="score-ring" id="scoreRing"><strong id="resultScore">0</strong><small>/100</small></div>
+<div class="result-stats"><div><small>Jawaban benar</small><strong id="resultCorrect">0/0</strong></div><div><small>Durasi</small><strong id="resultDuration">00:00</strong></div><div><small>Grade</small><strong id="resultGrade">-</strong></div></div>
+<div class="result-recommendation" id="resultRecommendation"></div>
+<div class="result-actions"><button class="button button-secondary" id="reviewAnswersButton" type="button">Tinjau jawaban</button><button class="button button-primary" id="backDashboardButton" type="button">Kembali ke dashboard</button></div>
+</div>
+<article class="review-panel hidden" id="answerReviewPanel"><div class="panel-heading"><div><h2>Pembahasan jawaban</h2><p class="muted">Pelajari alasan dari setiap jawaban.</p></div><button aria-label="Tutup pembahasan" class="icon-button" id="closeReviewButton" type="button">×</button></div><div id="answerReviewList"></div></article>
+</section>
+</main>
+<dialog class="confirm-dialog" id="confirmDialog">
+<form method="dialog"><h2 id="confirmTitle">Konfirmasi</h2><p id="confirmMessage">Apakah Anda yakin?</p><div class="dialog-actions"><button class="button button-secondary" value="cancel">Batal</button><button class="button button-danger" id="confirmAction" value="confirm">Ya, lanjutkan</button></div></form>
+</dialog>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/app.js"></script>
 </body>
 </html>

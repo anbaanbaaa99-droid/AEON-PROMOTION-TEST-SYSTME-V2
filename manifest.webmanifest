@@ -1,9 +1,9 @@
 {
-  "name": "AEON Promotion Test",
-  "short_name": "AEON Test",
+  "name": "AEON Learning & Promotion Test",
+  "short_name": "AEON Learning",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f6f7fb",
+  "background_color": "#f1efe8",
   "theme_color": "#8f005b",
   "icons": [{"src":"assets/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
 }
