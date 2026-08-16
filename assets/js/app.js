@@ -345,18 +345,30 @@
 
   function renderReadingLibrary() {
     if (!state.bootstrap) return;
-    const modules = (state.bootstrap.modules || []).filter(module => module.hasMaterial !== false);
     const map = readingProgressMap();
-    const completed = modules.filter(module => Number(map[String(module.name).toUpperCase()]?.progress) >= 100).length;
+    const progressFor = module => clamp(map[String(module.name).toUpperCase()]?.progress || 0, 0, 100);
+    const modules = (state.bootstrap.modules || [])
+      .filter(module => module.hasMaterial !== false)
+      .slice()
+      .sort((a,b) => {
+        const pa = progressFor(a), pb = progressFor(b);
+        const rank = p => p > 0 && p < 100 ? 0 : p === 0 ? 1 : 2;
+        return rank(pa) - rank(pb) || pb - pa || String(a.title || a.name).localeCompare(String(b.title || b.name));
+      });
+    const completed = modules.filter(module => progressFor(module) >= 100).length;
     const percent = modules.length ? Math.round(completed / modules.length * 100) : 0;
+    const featured = modules.find(module => {
+      const p = progressFor(module); return p > 0 && p < 100;
+    }) || modules.find(module => progressFor(module) === 0) || null;
     $('#readingOverallPercent').textContent = `${percent}%`;
     $('#readingOverallBar').style.width = `${percent}%`;
     $('#readingCompletedCount').textContent = `${completed}/${modules.length}`;
 
     $('#readingModuleList').innerHTML = modules.length ? modules.map(module => {
-      const progress = clamp(map[String(module.name).toUpperCase()]?.progress || 0, 0, 100);
+      const progress = progressFor(module);
       const active = state.reading?.module?.name === module.name;
-      return `<button class="reading-module-item ${active ? 'active' : ''}" type="button" data-read-module="${escapeAttr(module.name)}">
+      const isFeatured = featured?.name === module.name;
+      return `<button class="reading-module-item ${active ? 'active' : ''} ${isFeatured ? 'featured' : ''}" type="button" data-read-module="${escapeAttr(module.name)}">
         <header><h3>${escapeHtml(module.title || module.name)}</h3><span class="account-status ${progress >= 100 ? 'approved' : progress > 0 ? 'pending' : 'rejected'}">${progress >= 100 ? 'Selesai' : progress > 0 ? `${progress}%` : 'Mulai'}</span></header>
         <p>${escapeHtml(module.description || moduleDescriptions[module.name] || '')}</p>
         <div class="module-meta-line"><span>${Number(module.readingMinutes)||5} menit baca</span><span>${Number(module.questionCount)||0} soal</span></div>
@@ -376,6 +388,9 @@
       state.reading = { module:response.module, sections, sectionIndex:savedIndex, progress:clamp(saved.progress || 0,0,100), saving:false, pdfOpen:false };
       renderReadingLibrary();
       renderReader();
+      if (window.matchMedia('(max-width: 980px)').matches) {
+        requestAnimationFrame(() => $('#moduleReader')?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth', block:'start'}));
+      }
     } catch (error) { handleApiError(error); }
   }
 
