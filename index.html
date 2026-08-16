@@ -4,15 +4,15 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
-<meta content="#9a0062" name="theme-color"/>
+<meta content="#8f005b" name="theme-color"/>
 <meta content="Platform baca modul, latihan, dan evaluasi Promotion Test AEON." name="description"/>
 <title>AEON Promotion Test</title>
 <link href="manifest.webmanifest" rel="manifest"/>
 <link href="assets/icon.svg" rel="icon" type="image/svg+xml"/>
-<link rel="preconnect" href="https://script.google.com"/>
-<link rel="preconnect" href="https://script.googleusercontent.com"/>
-<link href="assets/css/style.css?v=5.4.0" rel="stylesheet"/>
-</head>
+<link href="https://script.google.com" rel="preconnect"/>
+<link href="https://script.googleusercontent.com" rel="preconnect"/>
+<link href="assets/css/style.css?v=5.5.0" rel="stylesheet"/>
+<meta content="light dark" name="color-scheme"/></head>
 <body>
 <a class="skip-link" href="#mainContent">Lewati ke konten</a>
 <div aria-atomic="true" aria-live="polite" class="toast-region" id="toastRegion"></div>
@@ -32,25 +32,13 @@
 </header>
 <main id="mainContent">
 <section class="auth-layout view" id="loginView">
-<div class="auth-hero">
-<div class="hero-overlay"></div>
-<div class="auth-hero-content">
-<div class="eyebrow">AEON PEOPLE · LEARNING HUB</div>
-<h1>Belajar.<br/>Praktik.<br/>Bertumbuh.</h1>
-<p>Materi promotion test, latihan, dan progres belajar dalam satu ruang yang cepat, jelas, dan mudah digunakan.</p>
-<div class="hero-points" aria-label="Fitur utama">
-<span><b>01</b> Baca modul</span>
-<span><b>02</b> Latihan</span>
-<span><b>03</b> Pantau progres</span>
-</div>
-</div>
-</div>
-<div class="auth-panel"><div class="auth-card">
+
+<div class="auth-panel auth-panel-centered"><div class="auth-card">
 <div class="brand brand-login">
 <span class="brand-mark">A</span>
 <span><strong>AEON</strong><small>Learning &amp; Promotion Test</small></span>
 </div>
-<div class="server-status" id="serverStatus" aria-live="polite"><span class="server-status-dot"></span><span id="serverStatusText">Memeriksa koneksi server...</span></div>
+<div aria-live="polite" class="server-status" id="serverStatus"><span class="server-status-dot"></span><span id="serverStatusText">Memeriksa koneksi server...</span></div>
 <div aria-label="Akun" class="auth-tabs" role="tablist">
 <button aria-selected="true" class="auth-tab active" data-auth-mode="login" id="loginTab" role="tab" type="button">Masuk</button>
 <button aria-selected="false" class="auth-tab" data-auth-mode="register" id="registerTab" role="tab" type="button">Daftar akun</button>
@@ -112,7 +100,10 @@
 <div><p class="eyebrow">RINGKASAN BELAJAR</p><h1 id="dashboardGreeting">Selamat datang</h1><p class="muted">Lanjutkan progres dan tingkatkan modul yang nilainya masih rendah.</p></div>
 <button class="button button-primary" id="startPracticeButton" type="button">Mulai latihan</button>
 </div>
-<div class="stat-grid" id="userStats">
+<article class="panel learning-journey" id="readingJourney">
+<div class="panel-heading"><div><p class="panel-number">LANJUT BELAJAR</p><h2>Lanjutkan modul Anda</h2><p class="muted">Buka materi terakhir, lanjutkan progres baca, lalu kerjakan latihan saat siap.</p></div><button class="button button-secondary button-small" id="startReadingButton" type="button">Lanjut membaca</button></div>
+<div class="journey-row"><div><strong id="dashboardReadingCompleted">0/0</strong><span>modul selesai dibaca</span></div><div class="reading-progress-track"><span id="dashboardReadingProgressBar"></span></div><strong id="dashboardReadingPercent">0%</strong></div>
+</article><div class="stat-grid" id="userStats">
 <article class="stat-card"><span class="stat-icon">◎</span><div><small>Rata-rata nilai</small><strong id="averageScore">0</strong></div></article>
 <article class="stat-card"><span class="stat-icon">★</span><div><small>Nilai terbaik</small><strong id="bestScore">0</strong></div></article>
 <article class="stat-card"><span class="stat-icon">✓</span><div><small>Tes selesai</small><strong id="attemptCount">0</strong></div></article>
@@ -128,16 +119,13 @@
 <div class="recommendation-card skeleton-block" id="recommendationCard"></div>
 </article>
 </div>
-<article class="panel learning-journey" id="readingJourney">
-<div class="panel-heading"><div><p class="panel-number">02 / READ</p><h2>Progress baca modul</h2><p class="muted">Selesaikan materi terlebih dahulu, lalu uji pemahaman melalui latihan soal.</p></div><button class="button button-secondary button-small" id="startReadingButton" type="button">Buka modul</button></div>
-<div class="journey-row"><div><strong id="dashboardReadingCompleted">0/0</strong><span>modul selesai dibaca</span></div><div class="reading-progress-track"><span id="dashboardReadingProgressBar"></span></div><strong id="dashboardReadingPercent">0%</strong></div>
-</article><article class="panel">
+<article class="panel">
 <div class="panel-heading"><div><h2>Aktivitas terbaru</h2><p class="muted">Tiga hasil terakhir Anda.</p></div><a class="text-link" href="#/history">Lihat semua</a></div>
 <div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Modul</th><th>Nilai</th><th>Grade</th></tr></thead><tbody id="recentResultsBody"></tbody></table></div>
 </article>
 </section>
 <section class="page-section hidden" id="modulesPage">
-<div class="page-heading editorial-heading"><div><p class="section-index">02 / LEARNING LIBRARY</p><h1>Baca modul.<br/>Pahami inti.</h1><p class="muted">Pilih modul, baca materi per bagian, simpan progres, lalu lanjutkan ke latihan soal yang sesuai.</p></div></div>
+<div class="page-heading editorial-heading"><div><p class="section-index">02 / LEARNING LIBRARY</p><h1>Baca modul</h1><p class="muted">Pilih modul, baca materi per bagian, simpan progres, lalu lanjutkan ke latihan soal yang sesuai.</p></div></div>
 <div class="reading-overview">
 <article class="reading-overview-card"><small>Progress baca</small><strong id="readingOverallPercent">0%</strong><div class="reading-progress-track"><span id="readingOverallBar"></span></div></article>
 <article class="reading-overview-card"><small>Modul selesai</small><strong id="readingCompletedCount">0/0</strong><span class="muted">Tersimpan di akun Anda</span></article>
@@ -156,15 +144,15 @@
 </header>
 <div class="reader-progress"><div class="reading-progress-track"><span id="readerProgressBar"></span></div><strong id="readerProgressText">0%</strong></div>
 <div class="reader-section-nav"><span id="readerSectionIndex">Bagian 1/1</span><span class="reader-source-pages" id="readerSourcePages">Ringkasan materi</span></div>
-<div class="reader-pdf-tools hidden" id="readerPdfTools"><button class="button button-secondary button-small" id="readerPdfToggle" type="button">Tampilkan PDF</button><a class="button button-ghost button-small" id="readerPdfOpen" href="#" target="_blank" rel="noopener">Buka PDF asli ↗</a></div>
-<div class="reader-pdf-panel hidden" id="readerPdfPanel"><iframe id="readerPdfFrame" title="PDF modul asli" loading="lazy"></iframe></div>
+<div class="reader-pdf-tools hidden" id="readerPdfTools"><button class="button button-secondary button-small" id="readerPdfToggle" type="button">Tampilkan PDF</button><a class="button button-ghost button-small" href="#" id="readerPdfOpen" rel="noopener" target="_blank">Buka PDF asli ↗</a></div>
+<div class="reader-pdf-panel hidden" id="readerPdfPanel"><iframe id="readerPdfFrame" loading="lazy" title="PDF modul asli"></iframe></div>
 <section class="reader-article"><h3 id="readerSectionTitle"></h3><div class="reader-body" id="readerSectionBody"></div><ul class="reader-bullets" id="readerSectionBullets"></ul></section>
 <footer class="reader-actions"><button class="button button-secondary" id="readerPrevious" type="button">← Sebelumnya</button><button class="button button-ghost" id="readerPracticeButton" type="button">Latihan soal modul ini</button><button class="button button-primary" id="readerNext" type="button">Berikutnya →</button></footer>
 </div>
 </article>
 </div>
 </section><section class="page-section hidden" id="practicePage">
-<div class="page-heading"><div><p class="eyebrow">PILIH MATERI</p><h1>Latihan promotion test</h1><p class="muted">Pilih modul, jumlah soal, dan durasi sebelum mulai.</p></div></div>
+<div class="page-heading"><div><p class="eyebrow">PILIH MATERI</p><h1>Latihan soal</h1><p class="muted">Pilih modul, jumlah soal, dan durasi sebelum mulai.</p></div></div>
 <div class="practice-layout">
 <article class="panel">
 <h2>Modul tersedia</h2>
@@ -182,33 +170,33 @@
 </div>
 </section>
 <section class="page-section hidden" id="historyPage">
-<div class="page-heading"><div><p class="eyebrow">HASIL BELAJAR</p><h1>Riwayat ujian</h1><p class="muted">Pantau perkembangan nilai dari waktu ke waktu.</p></div><button class="button button-secondary" id="exportMyHistory" type="button">Ekspor CSV</button></div>
+<div class="page-heading"><div><p class="eyebrow">HASIL BELAJAR</p><h1>Riwayat belajar</h1><p class="muted">Pantau perkembangan nilai dari waktu ke waktu.</p></div><button class="button button-secondary" id="exportMyHistory" type="button">Ekspor CSV</button></div>
 <article class="panel">
 <div class="filter-row"><label class="field compact"><span>Filter modul</span><select id="historyModuleFilter"><option value="">Semua modul</option></select></label><label class="field compact"><span>Cari</span><input id="historySearch" placeholder="Cari modul atau grade"/></label></div>
 <div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Modul</th><th>Benar</th><th>Nilai</th><th>Durasi</th><th>Grade</th></tr></thead><tbody id="historyTableBody"></tbody></table></div>
 </article>
 </section>
 <section class="page-section hidden" id="adminPage">
-<div class="page-heading"><div><p class="eyebrow">TRAINER MONITORING</p><h1>Dashboard evaluasi</h1><p class="muted">Identifikasi peserta dan modul yang memerlukan tindak lanjut.</p></div><button class="button button-secondary" id="exportAdminReport" type="button">Ekspor laporan</button></div>
-<div class="stat-grid">
+<div class="page-heading"><div><p class="eyebrow">TRAINER MONITORING</p><h1>Monitoring peserta</h1><p class="muted">Identifikasi peserta dan modul yang memerlukan tindak lanjut.</p></div><button class="button button-secondary" id="exportAdminReport" type="button">Ekspor laporan</button></div><article class="panel approval-panel">
+<div class="panel-heading"><div><p class="panel-number">ACCOUNT ACCESS</p><h2>Approval akun peserta</h2><p class="muted">Akun baru tidak dapat login sebelum disetujui admin.</p></div><div><span class="mini-stat">Menunggu <strong id="adminPendingUsers">0</strong></span> <button class="button button-secondary button-small" id="refreshAdminUsers" type="button">Refresh</button></div></div>
+<div class="filter-row"><label class="field compact"><span>Status akun</span><select id="adminAccountStatusFilter"><option value="">Semua status</option><option value="pending">Menunggu</option><option value="approved">Disetujui</option><option value="rejected">Ditolak</option></select></label><label class="field compact"><span>Cari akun</span><input id="adminAccountSearch" placeholder="ID, nama, departemen"/></label></div>
+<div class="table-wrap"><table><thead><tr><th>ID</th><th>Nama</th><th>Departemen</th><th>Level</th><th>Status</th><th>Modul Dibaca</th><th>Dibuat</th><th>Aksi</th></tr></thead><tbody id="adminAccountsBody"></tbody></table></div>
+</article><div class="stat-grid">
 <article class="stat-card"><span class="stat-icon">♙</span><div><small>Total peserta</small><strong id="adminTotalUsers">0</strong></div></article>
 <article class="stat-card"><span class="stat-icon">✓</span><div><small>Total percobaan</small><strong id="adminTotalAttempts">0</strong></div></article>
 <article class="stat-card"><span class="stat-icon">◎</span><div><small>Rata-rata nilai</small><strong id="adminAverageScore">0</strong></div></article>
 <article class="stat-card"><span class="stat-icon">!</span><div><small>Perlu remedial</small><strong id="adminRemedialCount">0</strong></div></article>
-</div><article class="panel approval-panel">
-<div class="panel-heading"><div><p class="panel-number">ACCOUNT ACCESS</p><h2>Approval akun peserta</h2><p class="muted">Akun baru tidak dapat login sebelum disetujui admin.</p></div><div><span class="mini-stat">Menunggu <strong id="adminPendingUsers">0</strong></span> <button class="button button-secondary button-small" id="refreshAdminUsers" type="button">Refresh</button></div></div>
-<div class="filter-row"><label class="field compact"><span>Status akun</span><select id="adminAccountStatusFilter"><option value="">Semua status</option><option value="pending">Menunggu</option><option value="approved">Disetujui</option><option value="rejected">Ditolak</option></select></label><label class="field compact"><span>Cari akun</span><input id="adminAccountSearch" placeholder="ID, nama, departemen"/></label></div>
-<div class="table-wrap"><table><thead><tr><th>ID</th><th>Nama</th><th>Departemen</th><th>Level</th><th>Status</th><th>Modul Dibaca</th><th>Dibuat</th><th>Aksi</th></tr></thead><tbody id="adminAccountsBody"></tbody></table></div>
-</article>
-<div class="dashboard-grid">
-<article class="panel panel-wide"><div class="panel-heading"><div><h2>Rata-rata per modul</h2><p class="muted">Perbandingan performa seluruh peserta.</p></div></div><div class="bar-chart" id="adminModuleChart"></div></article>
-<article class="panel"><div class="panel-heading"><div><h2>Prioritas evaluasi</h2><p class="muted">Modul dengan capaian terendah.</p></div></div><div id="adminRecommendation"></div></article>
-</div>
-<article class="panel">
+</div><article class="panel">
 <div class="panel-heading"><div><h2>Hasil peserta</h2><p class="muted">Gunakan filter untuk menemukan peserta yang membutuhkan remedial.</p></div></div>
 <div class="filter-row"><label class="field compact"><span>Modul</span><select id="adminModuleFilter"><option value="">Semua modul</option></select></label><label class="field compact"><span>Status</span><select id="adminStatusFilter"><option value="">Semua status</option><option value="remedial">Perlu remedial</option><option value="passed">Lulus</option></select></label><label class="field compact"><span>Cari peserta</span><input id="adminSearch" placeholder="Nama, ID, departemen"/></label></div>
 <div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>ID</th><th>Nama</th><th>Departemen</th><th>Modul</th><th>Nilai</th><th>Grade</th></tr></thead><tbody id="adminResultsBody"></tbody></table></div>
-</article>
+</article><div class="dashboard-grid">
+<article class="panel panel-wide"><div class="panel-heading"><div><h2>Rata-rata per modul</h2><p class="muted">Perbandingan performa seluruh peserta.</p></div></div><div class="bar-chart" id="adminModuleChart"></div></article>
+<article class="panel"><div class="panel-heading"><div><h2>Prioritas evaluasi</h2><p class="muted">Modul dengan capaian terendah.</p></div></div><div id="adminRecommendation"></div></article>
+</div>
+
+
+
 </section>
 </div>
 </section>
@@ -248,8 +236,8 @@
 <dialog class="confirm-dialog" id="confirmDialog">
 <form method="dialog"><h2 id="confirmTitle">Konfirmasi</h2><p id="confirmMessage">Apakah Anda yakin?</p><div class="dialog-actions"><button class="button button-secondary" value="cancel">Batal</button><button class="button button-danger" id="confirmAction" value="confirm">Ya, lanjutkan</button></div></form>
 </dialog>
-<script defer src="assets/js/config.js?v=5.4.0"></script>
-<script defer src="assets/js/api.js?v=5.4.0"></script>
-<script defer src="assets/js/app.js?v=5.4.0"></script>
+<script defer="" src="assets/js/config.js?v=5.5.0"></script>
+<script defer="" src="assets/js/api.js?v=5.5.0"></script>
+<script defer="" src="assets/js/app.js?v=5.5.0"></script>
 </body>
 </html>
