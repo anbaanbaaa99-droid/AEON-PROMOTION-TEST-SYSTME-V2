@@ -37,17 +37,33 @@
   function init() {
     bindGlobalEvents();
     restoreTheme();
-    updateServerStatus();
-    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-      navigator.serviceWorker.register('service-worker.js').catch(() => {});
-    }
+
     const session = api.getSession();
     if (session?.token && session?.user) {
+      // Jangan kirim health-check bersamaan dengan bootstrap.
+      // Bootstrap sendiri sudah menjadi bukti koneksi server.
       state.user = session.user;
       loadApplication().catch(handleFatalSessionError);
     } else {
       showLogin();
+      scheduleServerStatusCheck();
     }
+
+    // Service worker ditunda sampai halaman selesai agar tidak ikut
+    // berebut bandwidth/main-thread pada critical rendering path.
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+      window.addEventListener('load', () => {
+        const register = () => navigator.serviceWorker.register('service-worker.js').catch(() => {});
+        if ('requestIdleCallback' in window) requestIdleCallback(register, { timeout: 2500 });
+        else setTimeout(register, 900);
+      }, { once:true });
+    }
+  }
+
+  function scheduleServerStatusCheck() {
+    const run = () => updateServerStatus();
+    if ('requestIdleCallback' in window) requestIdleCallback(run, { timeout: 1200 });
+    else setTimeout(run, 350);
   }
 
   function bindGlobalEvents() {
@@ -277,7 +293,7 @@
     document.title = `${capitalize(routeName)} · ${cfg.APP_NAME}`;
     if (routeName === 'admin') loadAdminDashboard();
     if (routeName === 'modules') renderReadingLibrary();
-    window.scrollTo({ top:0, behavior:'smooth' });
+    window.scrollTo({ top:0, behavior:'auto' });
   }
 
   function navigate(routeName) {

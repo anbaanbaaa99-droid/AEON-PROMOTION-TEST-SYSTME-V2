@@ -480,7 +480,7 @@
     getModule,
     saveReadingProgress,
     logout,
-    health:()=>request('health'),
+    health:()=>request('health',{}, {timeout:12000}),
     bootstrap:()=>request('bootstrap',{}, {timeout:60000}),
     startQuiz:payload=>request('startQuiz',payload),
     submitQuiz:payload=>request('submitQuiz',payload,{timeout:45000}),
