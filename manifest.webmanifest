@@ -3,7 +3,7 @@
   "short_name": "AEON Learning",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f1efe8",
-  "theme_color": "#8f005b",
+  "background_color": "#f2eadf",
+  "theme_color": "#9a0062",
   "icons": [{"src":"assets/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
 }

@@ -1,76 +1,33 @@
-# AEON Learning & Promotion Test v5.1 — Auth & Layout Fix
+# AEON Learning & Promotion Test v5.4 — Editorial Performance
 
-Versi 5.1 adalah patch untuk masalah yang terlihat pada halaman login v5:
+Versi ini mengubah UI/UX dengan pendekatan editorial yang terinspirasi dari Pillars Brewery: komposisi grid tegas, latar cream, kontras ink, tipografi display besar, framed CTA, dan ritme visual sederhana. Identitas AEON tetap menggunakan magenta dan seluruh aset dibuat ringan tanpa webfont atau hero image.
 
-- hero/login kiri terpotong karena markup HTML dan CSS v5 tidak sinkron;
-- kotak **Mode demo aktif** sebelumnya selalu terlihat walaupun backend sebenarnya sudah dikonfigurasi;
-- session frontend dibuat lebih tahan reload dengan memory + localStorage/sessionStorage fallback;
-- session backend sekarang menyimpan waktu kedaluwarsa sebagai epoch milliseconds agar tidak bergantung pada format tanggal/locale Google Sheet;
-- `config.js`, `api.js`, dan `app.js` memakai cache-busting `?v=5.1.0`;
-- Service Worker v5.1 selalu mengambil `config.js` terbaru dan menghapus cache versi lama;
-- elemen PDF reader yang sudah dipanggil `app.js` tetapi belum ada di `index.html` sekarang sudah ditambahkan.
+## Fokus performa v5.4
+- `doPost()` tidak menjalankan `ensureSystem_()` pada setiap request.
+- Session persisten memakai Script Properties; sheet `Sessions` hanya untuk audit.
+- `readObjects_()` membaca header + data dalam satu `getValues()`.
+- `updateObject_()` mengubah satu baris dengan satu write, bukan beberapa `setValue()`.
+- katalog modul di-cache 15 menit karena jarang berubah.
+- admin dashboard membaca `ReadingProgress` satu kali, bukan sekali per peserta.
+- health-check tidak dijalankan bersamaan dengan bootstrap session tersimpan.
+- registrasi service worker ditunda sampai halaman selesai dimuat / browser idle.
+- service worker tidak menyimpan PDF besar ke CacheStorage.
+- PDF tetap lazy: baru diambil setelah peserta membukanya.
+- tidak ada external webfont, library UI, hero photo, backdrop blur, atau animasi berat.
+- `content-visibility` dipakai pada area baca/tabel yang panjang.
 
-## PENTING — langkah upgrade
+## Upgrade dari v5.3
+1. Backup project Apps Script dan Google Sheet.
+2. Replace seluruh isi `Kode.gs` dengan `Code.gs` dari paket ini.
+3. `Security.gs` tetap kosong/komentar seperti file dalam paket.
+4. Save, lalu jalankan `setupSystem()` satu kali.
+5. Jalankan `testAdminSession()` dan pastikan sukses.
+6. Deploy → Manage deployments → Edit → **New version** → Deploy.
+7. Upload seluruh frontend v5.4 ke GitHub Pages. Minimal replace `index.html`, `assets/css/style.css`, `assets/js/app.js`, `assets/js/api.js`, `service-worker.js`, dan `manifest.webmanifest`.
+8. Hard refresh. Jika UI lama masih muncul, unregister service worker lama lalu reload.
+9. Indikator login harus menampilkan `Server terhubung · v5.4.0`.
 
-1. **Backup Google Sheet dan Apps Script terlebih dahulu.**
-2. Ganti isi Apps Script dengan `Code.gs` v5.1.
-3. Bila `DEFAULT_ADMIN_PASSWORD` pernah diubah setelah `setupSystem()` pertama kali dijalankan, jalankan:
+Tidak perlu menjalankan `upgradeContentV5()` bila modul dan soal v5 sudah terpasang.
 
-   `resetAdminPassword()`
-
-   Contoh: bila sekarang `DEFAULT_ADMIN_PASSWORD = 'admin1006'`, fungsi ini yang benar-benar memperbarui hash password akun ADMIN di sheet `Users`.
-
-4. Jalankan:
-
-   `testAdminSession()`
-
-   Bila backend benar, hasilnya mengandung:
-
-   `"ok": true` dan `"message": "Backend login dan session valid."`
-
-5. Deploy ulang Apps Script sebagai **New version**:
-   - Execute as: **Me**
-   - Who has access: **Anyone**
-6. Salin URL Web App yang berakhir `/exec` ke `assets/js/config.js` bila URL deployment berubah.
-7. Replace **seluruh** frontend dengan folder v5.1, jangan hanya `index.html`.
-8. Buka web lalu lakukan **Ctrl + Shift + R** satu kali.
-9. Jika browser masih menampilkan versi lama, buka DevTools → Application → Service Workers → **Unregister**, lalu reload.
-
-## Cara membaca status koneksi
-
-Di kartu login sekarang ada indikator:
-
-- **Server terhubung · v5.1.0** → frontend sudah berbicara dengan Apps Script.
-- **Server tidak dapat dijangkau** → cek deployment Apps Script / URL `API_URL`.
-- **API belum dikonfigurasi** → `API_URL` di `assets/js/config.js` kosong/tidak valid.
-
-Mode demo dinonaktifkan secara default pada paket produksi v5.1.
-
-## Tentang data lama
-
-Patch v5.1 tidak perlu menghapus akun, nilai, modul, progress membaca, atau hasil ujian. Format session lama berupa Date masih dapat dibaca; session baru memakai epoch milliseconds.
-
-## Struktur
-
-```text
-/index.html
-/manifest.webmanifest
-/service-worker.js
-/assets/css/style.css
-/assets/js/config.js
-/assets/js/api.js
-/assets/js/app.js
-/assets/modules/*.pdf
-/Code.gs
-```
-
-## Tes akhir
-
-1. Jalankan `testAdminSession()` di Apps Script.
-2. Login ADMIN dari web.
-3. Reload halaman; akun harus tetap login selama session belum kedaluwarsa.
-4. Register akun peserta baru → Pending.
-5. ADMIN → Monitoring → ACC peserta.
-6. Login peserta → Baca Modul → pindah bagian → progress tersimpan.
-7. Buka PDF asli dari reader.
-8. Kerjakan latihan dan cek riwayat nilai.
+## Catatan desain
+Referensi dipakai sebagai arah visual/UX, bukan salinan identitas atau aset: editorial grid, cream/black contrast, display typography, simple framed calls-to-action, dan navigasi yang jelas. AEON magenta, isi training, alur akun, approval, modul, latihan, dan monitoring tetap milik aplikasi ini.
