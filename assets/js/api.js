@@ -203,7 +203,7 @@
   }
 
   async function login(id, password) {
-    const result = await request('login', { id: String(id).trim(), password: String(password) });
+    const result = await request('login', { id: String(id).trim(), password: String(password) }, {timeout:45000});
     setStoredSession({ token: result.token, user: result.user, expiresAt: result.expiresAt });
     return result;
   }
@@ -481,10 +481,10 @@
     saveReadingProgress,
     logout,
     health:()=>request('health'),
-    bootstrap:()=>request('bootstrap'),
+    bootstrap:()=>request('bootstrap',{}, {timeout:60000}),
     startQuiz:payload=>request('startQuiz',payload),
     submitQuiz:payload=>request('submitQuiz',payload,{timeout:45000}),
-    adminDashboard:()=>request('adminDashboard'),
+    adminDashboard:()=>request('adminDashboard',{}, {timeout:60000}),
     adminUpdateUserStatus:payload=>request('adminUpdateUserStatus',payload),
     clearSession:()=>setStoredSession(null)
   });

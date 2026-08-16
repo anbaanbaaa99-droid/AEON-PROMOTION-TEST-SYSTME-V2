@@ -139,14 +139,24 @@
     if (invalid) return;
 
     setButtonLoading($('#loginButton'), true);
+    let loginSucceeded = false;
     try {
       const result = await api.login(id, password);
+      loginSucceeded = true;
       state.user = result.user;
+      toast('Login berhasil. Memuat dashboard…', 'success');
       await loadApplication();
       toast(`Selamat datang, ${state.user.name}.`, 'success');
     } catch (error) {
-      $('#passwordError').textContent = error.message || 'Login gagal.';
-      toast(error.message || 'Login gagal.', 'error');
+      const message = error.message || 'Login gagal.';
+      if (loginSucceeded) {
+        // Kredensial sudah valid; kegagalan berikutnya berasal dari pemuatan dashboard/bootstrap.
+        $('#passwordError').textContent = 'Login berhasil, tetapi dashboard terlalu lama dimuat. Coba tekan Masuk lagi atau muat ulang halaman.';
+        toast('Login berhasil, tetapi dashboard belum selesai dimuat.', 'error');
+      } else {
+        $('#passwordError').textContent = message;
+        toast(message, 'error');
+      }
     } finally { setButtonLoading($('#loginButton'), false); }
   }
 
