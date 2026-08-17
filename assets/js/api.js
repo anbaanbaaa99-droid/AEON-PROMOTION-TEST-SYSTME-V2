@@ -486,6 +486,17 @@
     submitQuiz:payload=>request('submitQuiz',payload,{timeout:45000}),
     adminDashboard:()=>request('adminDashboard',{}, {timeout:60000}),
     adminUpdateUserStatus:payload=>request('adminUpdateUserStatus',payload),
+    adminCmsOverview:()=>request('adminCmsOverview',{}, {timeout:60000}),
+    adminGetModuleDraft:module=>request('adminGetModuleDraft',{module}, {timeout:60000}),
+    adminSaveModuleDraft:payload=>request('adminSaveModuleDraft',payload,{timeout:60000}),
+    adminPublishModule:module=>request('adminPublishModule',{module},{timeout:60000}),
+    adminModuleVersions:module=>request('adminModuleVersions',{module}),
+    adminRollbackModule:(module,version)=>request('adminRollbackModule',{module,version},{timeout:60000}),
+    adminQuestions:module=>request('adminQuestions',{module},{timeout:60000}),
+    adminSaveQuestion:payload=>request('adminSaveQuestion',payload,{timeout:60000}),
+    adminSetQuestionActive:payload=>request('adminSetQuestionActive',payload),
+    adminUsers:()=>request('adminUsers',{}, {timeout:60000}),
+    adminUpdateUserRole:payload=>request('adminUpdateUserRole',payload),
     clearSession:()=>setStoredSession(null)
   });
 })();

@@ -15,6 +15,7 @@
     latestResult: null,
     adminData: null,
     reading: null,
+    cms: { overview:null, editing:null, questions:[], users:[], tab:'' },
     pendingConfirm: null
   };
 
@@ -37,6 +38,7 @@
   function init() {
     bindGlobalEvents();
     restoreTheme();
+    initRevealAnimations();
 
     const session = api.getSession();
     if (session?.token && session?.user) {
@@ -101,6 +103,21 @@
     $('#refreshAdminUsers').addEventListener('click', loadAdminDashboard);
     $('#exportMyHistory').addEventListener('click', exportMyHistory);
     $('#exportAdminReport').addEventListener('click', exportAdminReport);
+    $$('[data-admin-tab]').forEach(button => button.addEventListener('click', () => activateAdminTab(button.dataset.adminTab)));
+    $('#cmsAddSection')?.addEventListener('click', () => addCmsSection());
+    $('#cmsSaveDraft')?.addEventListener('click', saveCmsDraft);
+    $('#cmsPublishModule')?.addEventListener('click', publishCmsModule);
+    $('#cmsPreviewDraft')?.addEventListener('click', previewCmsDraft);
+    $('#cmsRefreshVersions')?.addEventListener('click', loadCmsVersions);
+    $('#cmsSections')?.addEventListener('click', handleCmsSectionAction);
+    $('#cmsSections')?.addEventListener('change', handleCmsSectionChange);
+    $('#cmsAddQuestion')?.addEventListener('click', () => openQuestionEditor());
+    $('#cmsQuestionModule')?.addEventListener('change', () => loadCmsQuestions($('#cmsQuestionModule').value));
+    $('#cmsQuestionSearch')?.addEventListener('input', debounce(renderCmsQuestions, 150));
+    $('#cmsQuestionList')?.addEventListener('click', handleQuestionListAction);
+    $('#saveQuestionButton')?.addEventListener('click', saveCmsQuestion);
+    $('#refreshRoleUsers')?.addEventListener('click', loadRoleUsers);
+    $('#roleManagementBody')?.addEventListener('change', handleRoleChange);
     window.addEventListener('hashchange', route);
     window.addEventListener('keydown', handleQuizKeyboard);
     window.addEventListener('beforeunload', event => {
@@ -239,7 +256,7 @@
     configureUserUI();
     const requested = (location.hash.replace('#/', '') || 'dashboard').split('?')[0];
     const allowed = ['dashboard','modules','practice','history','admin'];
-    if (!allowed.includes(requested) || (requested === 'admin' && !isAdmin())) location.hash = '#/dashboard';
+    if (!allowed.includes(requested) || (requested === 'admin' && !hasAdminArea())) location.hash = '#/dashboard';
     else route();
   }
 
@@ -258,7 +275,10 @@
     $('#headerUserName').textContent = state.user.name || 'Peserta';
     $('#headerUserRole').textContent = state.user.role || 'User';
     $('#userAvatar').textContent = initials(state.user.name || state.user.id);
-    $$('.admin-only').forEach(el => el.classList.toggle('hidden', !isAdmin()));
+    $$('.admin-only').forEach(el => el.classList.toggle('hidden', !hasAdminArea()));
+    $$('.monitoring-only').forEach(el => el.classList.toggle('hidden', !canMonitor()));
+    $$('.content-only').forEach(el => el.classList.toggle('hidden', !canManageContent()));
+    $$('.superadmin-only').forEach(el => el.classList.toggle('hidden', !isSuperAdmin()));
     $('#demoCredentials').classList.toggle('hidden', !api.demoMode);
   }
 
@@ -279,7 +299,7 @@
   function route() {
     if (!state.user) return showLogin();
     const routeName = (location.hash.replace('#/', '') || 'dashboard').split('?')[0];
-    if (routeName === 'admin' && !isAdmin()) return navigate('dashboard');
+    if (routeName === 'admin' && !hasAdminArea()) return navigate('dashboard');
     if (!['dashboard','modules','practice','history','admin'].includes(routeName)) return navigate('dashboard');
 
     $('#loginView').classList.add('hidden');
@@ -291,7 +311,7 @@
     $(`#${routeName}Page`).classList.remove('hidden');
     $$('[data-route-link]').forEach(link => link.classList.toggle('active', link.dataset.routeLink === routeName));
     document.title = `${capitalize(routeName)} · ${cfg.APP_NAME}`;
-    if (routeName === 'admin') loadAdminDashboard();
+    if (routeName === 'admin') initializeAdminArea();
     if (routeName === 'modules') renderReadingLibrary();
     window.scrollTo({ top:0, behavior:'auto' });
   }
@@ -417,7 +437,7 @@
     $('#readerSectionIndex').textContent = `Bagian ${index + 1}/${sections.length}`;
     const sourcePages = String(section.sourcePages || '').trim();
     $('#readerSourcePages').textContent = sourcePages ? `Sumber PDF: halaman ${sourcePages}` : 'Ringkasan materi';
-    const pdfUrl = String(module.pdfUrl || '').trim();
+    const pdfUrl = String(module.pdfUrl || module.sourcePdf || '').trim();
     $('#readerPdfTools').classList.toggle('hidden', !pdfUrl);
     $('#readerPdfOpen').href = pdfUrl || '#';
     $('#readerPdfToggle').textContent = reading.pdfOpen ? 'Sembunyikan PDF' : 'Tampilkan PDF';
@@ -434,6 +454,8 @@
     const bullets = Array.isArray(section.bullets) ? section.bullets : [];
     $('#readerSectionBullets').innerHTML = bullets.map(item => `<li>${escapeHtml(item)}</li>`).join('');
     $('#readerSectionBullets').classList.toggle('hidden', !bullets.length);
+    $('#readerBlocks').innerHTML = renderLearningBlocks(Array.isArray(section.blocks) ? section.blocks : []);
+    bindEmbedLoaders($('#readerBlocks'));
     $('#readerPrevious').disabled = index === 0;
     $('#readerNext').textContent = index === sections.length - 1 ? (progress >= 100 ? 'Sudah selesai ✓' : 'Tandai selesai ✓') : 'Berikutnya →';
     $('#readerNext').disabled = reading.saving || (index === sections.length - 1 && progress >= 100);
@@ -442,7 +464,7 @@
   }
 
   function toggleReaderPdf() {
-    if (!state.reading?.module?.pdfUrl) return toast('PDF asli belum tersedia untuk modul ini.', 'error');
+    if (!(state.reading?.module?.pdfUrl || state.reading?.module?.sourcePdf)) return toast('PDF asli belum tersedia untuk modul ini.', 'error');
     state.reading.pdfOpen = !state.reading.pdfOpen;
     renderReader();
   }
@@ -739,8 +761,198 @@
       <tr><td>${formatDate(row.date)}</td><td><strong>${escapeHtml(row.module)}</strong></td><td>${Number(row.correct)||0}/${Number(row.total)||0}</td><td>${scorePill(row.score)}</td><td>${formatDuration(row.durationSec)}</td><td>${statusPill(row.grade,row.score)}</td></tr>`).join('') : emptyRow(6,'Data tidak ditemukan.');
   }
 
+
+  function roleKey(role = state.user?.role) {
+    const key = String(role || 'User').toLowerCase().replace(/[\s_-]+/g,'');
+    if (key === 'admin' || key === 'superadmin') return 'superadmin';
+    if (key === 'contentadmin' || key === 'editor' || key === 'contenteditor') return 'contentadmin';
+    if (key === 'trainer') return 'trainer';
+    return 'user';
+  }
+  function hasAdminArea() { return roleKey() !== 'user'; }
+  function canMonitor() { return ['superadmin','trainer'].includes(roleKey()); }
+  function canManageContent() { return ['superadmin','contentadmin'].includes(roleKey()); }
+  function isSuperAdmin() { return roleKey() === 'superadmin'; }
+
+  function initializeAdminArea() {
+    configureUserUI();
+    const requested = state.cms.tab;
+    const allowed = requested && adminTabAllowed(requested) ? requested : (canMonitor() ? 'monitoring' : canManageContent() ? 'content' : isSuperAdmin() ? 'roles' : '');
+    if (allowed) activateAdminTab(allowed);
+  }
+
+  function adminTabAllowed(tab) {
+    if (tab === 'monitoring') return canMonitor();
+    if (tab === 'content' || tab === 'questions') return canManageContent();
+    if (tab === 'roles') return isSuperAdmin();
+    return false;
+  }
+
+  async function activateAdminTab(tab) {
+    if (!adminTabAllowed(tab)) return;
+    state.cms.tab = tab;
+    $$('[data-admin-tab]').forEach(button => button.classList.toggle('active', button.dataset.adminTab === tab));
+    $$('[data-admin-panel]').forEach(panel => panel.classList.toggle('hidden', panel.dataset.adminPanel !== tab));
+    if (tab === 'monitoring') await loadAdminDashboard();
+    if (tab === 'content') await loadCmsOverview();
+    if (tab === 'questions') { await loadCmsOverview(); populateCmsQuestionModules(); const value=$('#cmsQuestionModule')?.value; if(value) await loadCmsQuestions(value); }
+    if (tab === 'roles') await loadRoleUsers();
+  }
+
+  async function loadCmsOverview(force = false) {
+    if (!canManageContent()) return;
+    if (state.cms.overview && !force) { renderCmsModules(); populateCmsQuestionModules(); return; }
+    const list = $('#cmsModuleList');
+    if (list) list.innerHTML = '<p class="muted">Memuat katalog materi…</p>';
+    try {
+      state.cms.overview = await api.adminCmsOverview();
+      renderCmsModules();
+      populateCmsQuestionModules();
+    } catch (error) { handleApiError(error); }
+  }
+
+  function renderCmsModules() {
+    const modules = state.cms.overview?.modules || [];
+    const container = $('#cmsModuleList');
+    if (!container) return;
+    container.innerHTML = modules.length ? modules.map(module => `
+      <article class="cms-module-card">
+        <header><div><p class="eyebrow">${escapeHtml(module.name)}</p><h3>${escapeHtml(module.title)}</h3></div><span class="account-status ${String(module.status).toLowerCase()==='draft'?'pending':'approved'}">${escapeHtml(module.status || 'Published')}</span></header>
+        <p>${escapeHtml(module.description || '')}</p>
+        <div class="cms-card-meta"><span>${Number(module.sectionCount)||0} bagian</span><span>${Number(module.questionCount)||0} soal</span><span>v${Number(module.version)||1}</span></div>
+        <small>Update: ${module.updatedAt ? formatDate(module.updatedAt) : '-'} · ${escapeHtml(module.updatedBy || 'SYSTEM')}</small>
+        <div class="cms-card-actions"><button class="button button-primary button-small" type="button" data-cms-edit="${escapeAttr(module.name)}">Edit materi</button><button class="button button-secondary button-small" type="button" data-cms-questions="${escapeAttr(module.name)}">Kelola soal</button></div>
+      </article>`).join('') : '<p class="muted">Belum ada modul.</p>';
+    $$('[data-cms-edit]', container).forEach(button => button.addEventListener('click', () => openModuleEditor(button.dataset.cmsEdit)));
+    $$('[data-cms-questions]', container).forEach(button => button.addEventListener('click', async () => { await activateAdminTab('questions'); $('#cmsQuestionModule').value=button.dataset.cmsQuestions; await loadCmsQuestions(button.dataset.cmsQuestions); }));
+  }
+
+  function populateCmsQuestionModules() {
+    const modules = state.cms.overview?.modules || [];
+    const select = $('#cmsQuestionModule');
+    const editorSelect = $('#questionEditorModule');
+    const options = modules.map(m=>`<option value="${escapeAttr(m.name)}">${escapeHtml(m.title || m.name)}</option>`).join('');
+    if (select) { const current=select.value; select.innerHTML='<option value="">Pilih modul</option>'+options; if(modules.some(m=>m.name===current)) select.value=current; }
+    if (editorSelect) editorSelect.innerHTML=options;
+  }
+
+  async function openModuleEditor(moduleName) {
+    try {
+      const response = await api.adminGetModuleDraft(moduleName);
+      state.cms.editing = response.module;
+      $('#cmsEditorHeading').textContent = response.module.title || response.module.name;
+      $('#cmsEditorMeta').textContent = `${response.module.name} · ${response.module.status} · v${response.module.version}`;
+      $('#cmsModuleTitle').value = response.module.title || '';
+      $('#cmsModuleDescription').value = response.module.description || '';
+      $('#cmsModuleMinutes').value = response.module.readingMinutes || 5;
+      $('#cmsModulePdf').value = response.module.sourcePdf || '';
+      renderCmsSections();
+      $('#cmsVersionList').innerHTML = '';
+      showDialog($('#moduleEditorDialog'));
+    } catch(error) { handleApiError(error); }
+  }
+
+  function blankSection() { return {title:'Bagian baru',body:'',bullets:[],sourcePages:'',blocks:[]}; }
+  function addCmsSection() { if(!state.cms.editing) return; state.cms.editing.sections = Array.isArray(state.cms.editing.sections)?state.cms.editing.sections:[]; state.cms.editing.sections.push(blankSection()); renderCmsSections(); }
+
+  function renderCmsSections() {
+    const sections = state.cms.editing?.sections || [];
+    const container = $('#cmsSections'); if(!container) return;
+    container.innerHTML = sections.length ? sections.map((section,index)=>cmsSectionHtml(section,index)).join('') : '<div class="cms-empty"><p>Belum ada bagian materi.</p><button class="button button-secondary button-small" type="button" data-section-action="add">+ Tambah bagian pertama</button></div>';
+  }
+
+  function cmsSectionHtml(section,index) {
+    const blocks = Array.isArray(section.blocks)?section.blocks:[];
+    return `<article class="cms-section-card" data-section-index="${index}">
+      <header><span>${String(index+1).padStart(2,'0')}</span><strong>${escapeHtml(section.title || `Bagian ${index+1}`)}</strong><div><button class="icon-button mini" type="button" data-section-action="up">↑</button><button class="icon-button mini" type="button" data-section-action="down">↓</button><button class="icon-button mini danger" type="button" data-section-action="delete">×</button></div></header>
+      <label class="field"><span>Judul bagian</span><input class="cms-section-title" value="${escapeAttr(section.title||'')}"/></label>
+      <label class="field"><span>Paragraf utama</span><textarea class="cms-section-body" rows="4">${escapeHtml(section.body||'')}</textarea></label>
+      <label class="field"><span>Bullet (1 baris = 1 poin)</span><textarea class="cms-section-bullets" rows="3">${escapeHtml((section.bullets||[]).join('\n'))}</textarea></label>
+      <label class="field"><span>Referensi halaman</span><input class="cms-section-pages" value="${escapeAttr(section.sourcePages||'')}" placeholder="Contoh: 12-15"/></label>
+      <div class="cms-block-heading"><strong>Konten visual tambahan</strong><button class="button button-ghost button-small" type="button" data-section-action="add-block">+ Tambah blok</button></div>
+      <div class="cms-block-list">${blocks.map((block,blockIndex)=>cmsBlockHtml(block,blockIndex)).join('')}</div>
+    </article>`;
+  }
+
+  function cmsBlockHtml(block,index) {
+    const type=block.type||'paragraph';
+    const isMedia=['image','embed'].includes(type), isBullets=type==='bullets';
+    const textValue=isBullets?(block.items||[]).join('\n'):(block.text||block.alt||block.label||'');
+    return `<div class="cms-block-card" data-block-index="${index}"><div class="cms-block-top"><select class="cms-block-type"><option value="paragraph" ${type==='paragraph'?'selected':''}>Paragraf</option><option value="heading" ${type==='heading'?'selected':''}>Subjudul</option><option value="bullets" ${type==='bullets'?'selected':''}>Bullet</option><option value="highlight" ${type==='highlight'?'selected':''}>Highlight</option><option value="formula" ${type==='formula'?'selected':''}>Formula</option><option value="image" ${type==='image'?'selected':''}>Gambar</option><option value="embed" ${type==='embed'?'selected':''}>Embed PPT/Doc</option></select><button class="icon-button mini" type="button" data-block-action="up">↑</button><button class="icon-button mini" type="button" data-block-action="down">↓</button><button class="icon-button mini danger" type="button" data-block-action="delete">×</button></div>
+      ${isMedia?`<label class="field"><span>URL</span><input class="cms-block-url" value="${escapeAttr(block.url||'')}" placeholder="https://... atau assets/..."/></label><label class="field"><span>${type==='image'?'Alt text':'Label tombol'}</span><input class="cms-block-text" value="${escapeAttr(textValue)}"/></label><label class="field"><span>Caption</span><input class="cms-block-meta" value="${escapeAttr(block.caption||'')}"/></label>`:`<label class="field"><span>${isBullets?'Isi (1 baris = 1 poin)':'Isi blok'}</span><textarea class="cms-block-text" rows="3">${escapeHtml(textValue)}</textarea></label>`}
+    </div>`;
+  }
+
+  function syncCmsEditorFromDom() {
+    if(!state.cms.editing) return;
+    const sections=[];
+    $$('.cms-section-card', $('#cmsSections')).forEach(card=>{
+      const section={title:$('.cms-section-title',card).value.trim(),body:$('.cms-section-body',card).value.trim(),bullets:$('.cms-section-bullets',card).value.split(/\n+/).map(x=>x.trim()).filter(Boolean),sourcePages:$('.cms-section-pages',card).value.trim(),blocks:[]};
+      $$('.cms-block-card',card).forEach(blockCard=>{
+        const type=$('.cms-block-type',blockCard).value, text=$('.cms-block-text',blockCard)?.value.trim()||'';
+        if(type==='bullets') section.blocks.push({type,items:text.split(/\n+/).map(x=>x.trim()).filter(Boolean)});
+        else if(type==='image') section.blocks.push({type,url:$('.cms-block-url',blockCard)?.value.trim()||'',alt:text,caption:$('.cms-block-meta',blockCard)?.value.trim()||''});
+        else if(type==='embed') section.blocks.push({type,url:$('.cms-block-url',blockCard)?.value.trim()||'',label:text||'Buka materi visual',caption:$('.cms-block-meta',blockCard)?.value.trim()||''});
+        else section.blocks.push({type,text});
+      });
+      sections.push(section);
+    });
+    state.cms.editing.sections=sections;
+    state.cms.editing.title=$('#cmsModuleTitle').value.trim();
+    state.cms.editing.description=$('#cmsModuleDescription').value.trim();
+    state.cms.editing.readingMinutes=Number($('#cmsModuleMinutes').value)||5;
+    state.cms.editing.sourcePdf=$('#cmsModulePdf').value.trim();
+  }
+
+  function handleCmsSectionChange(event) {
+    if(event.target.matches('.cms-block-type')) { syncCmsEditorFromDom(); renderCmsSections(); }
+  }
+
+  function handleCmsSectionAction(event) {
+    const button=event.target.closest('[data-section-action],[data-block-action]'); if(!button||!state.cms.editing) return;
+    syncCmsEditorFromDom();
+    const sectionCard=button.closest('.cms-section-card');
+    if(button.dataset.sectionAction==='add') return addCmsSection();
+    if(!sectionCard) return;
+    const si=Number(sectionCard.dataset.sectionIndex), sections=state.cms.editing.sections;
+    const sa=button.dataset.sectionAction;
+    if(sa==='up'&&si>0) [sections[si-1],sections[si]]=[sections[si],sections[si-1]];
+    if(sa==='down'&&si<sections.length-1) [sections[si+1],sections[si]]=[sections[si],sections[si+1]];
+    if(sa==='delete') sections.splice(si,1);
+    if(sa==='add-block') sections[si].blocks.push({type:'paragraph',text:''});
+    const blockCard=button.closest('.cms-block-card');
+    if(blockCard&&button.dataset.blockAction){ const bi=Number(blockCard.dataset.blockIndex), blocks=sections[si].blocks, ba=button.dataset.blockAction; if(ba==='up'&&bi>0)[blocks[bi-1],blocks[bi]]=[blocks[bi],blocks[bi-1]]; if(ba==='down'&&bi<blocks.length-1)[blocks[bi+1],blocks[bi]]=[blocks[bi],blocks[bi+1]]; if(ba==='delete')blocks.splice(bi,1); }
+    renderCmsSections();
+  }
+
+  function cmsPayload() { syncCmsEditorFromDom(); const m=state.cms.editing; return {module:m.name,title:m.title,description:m.description,readingMinutes:m.readingMinutes,sourcePdf:m.sourcePdf,sections:m.sections,active:m.active!==false}; }
+
+  async function saveCmsDraft() { if(!state.cms.editing)return false; setButtonBusyText($('#cmsSaveDraft'),true,'Menyimpan…'); try{ const result=await api.adminSaveModuleDraft(cmsPayload()); state.cms.editing=result.module; toast(result.message||'Draft tersimpan.','success'); state.cms.overview=null; renderCmsSections(); $('#cmsEditorMeta').textContent=`${result.module.name} · Draft · v${result.module.version}`; return true; }catch(e){handleApiError(e);return false;}finally{setButtonBusyText($('#cmsSaveDraft'),false,'Simpan draft');} }
+  async function publishCmsModule() { if(!state.cms.editing)return; const saved=await saveCmsDraft(); if(!saved)return; showConfirm('Publish materi?','Versi yang sedang digunakan peserta akan diganti dengan draft ini. Riwayat versi lama tetap disimpan.','Publish',async()=>{ try{ const result=await api.adminPublishModule(state.cms.editing.name); toast(result.message,'success'); state.cms.overview=null; const fresh=await api.adminGetModuleDraft(state.cms.editing.name); state.cms.editing=fresh.module; $('#cmsEditorMeta').textContent=`${fresh.module.name} · Published · v${fresh.module.version}`; await loadCmsOverview(true); await refreshBootstrap(); }catch(e){handleApiError(e);} }); }
+
+  function previewCmsDraft() { if(!state.cms.editing)return; syncCmsEditorFromDom(); $('#previewModuleTitle').textContent=state.cms.editing.title||state.cms.editing.name; $('#previewSections').innerHTML=(state.cms.editing.sections||[]).map((section,i)=>`<article class="preview-section"><p class="eyebrow">BAGIAN ${i+1}/${state.cms.editing.sections.length}</p><h3>${escapeHtml(section.title||'')}</h3>${String(section.body||'').split(/\n{2,}/).filter(Boolean).map(x=>`<p>${escapeHtml(x)}</p>`).join('')}${section.bullets?.length?`<ul>${section.bullets.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>`:''}${renderLearningBlocks(section.blocks||[])}</article>`).join(''); bindEmbedLoaders($('#previewSections')); showDialog($('#draftPreviewDialog')); }
+
+  async function loadCmsVersions(){ if(!state.cms.editing)return; const box=$('#cmsVersionList'); box.innerHTML='<p class="muted">Memuat versi…</p>'; try{const result=await api.adminModuleVersions(state.cms.editing.name); box.innerHTML=(result.versions||[]).map(v=>`<div class="version-row"><span><strong>v${v.version}</strong><small>${v.publishedAt?formatDate(v.publishedAt):'-'} · ${escapeHtml(v.publishedBy||'-')}</small></span><button class="button button-ghost button-small" type="button" data-rollback-version="${v.version}">Rollback</button></div>`).join('')||'<p class="muted">Belum ada riwayat versi.</p>'; $$('[data-rollback-version]',box).forEach(btn=>btn.addEventListener('click',()=>showConfirm(`Rollback ke v${btn.dataset.rollbackVersion}?`,'Konten versi lama akan dipublish sebagai versi baru.','Rollback',async()=>{try{const r=await api.adminRollbackModule(state.cms.editing.name,Number(btn.dataset.rollbackVersion));toast(r.message,'success');state.cms.overview=null;await openModuleEditor(state.cms.editing.name);}catch(e){handleApiError(e);}})));}catch(e){handleApiError(e);} }
+
+  async function loadCmsQuestions(moduleName){ if(!canManageContent()||!moduleName)return; $('#cmsQuestionList').innerHTML='<p class="muted">Memuat soal…</p>'; try{const result=await api.adminQuestions(moduleName); state.cms.questions=result.questions||[]; renderCmsQuestions();}catch(e){handleApiError(e);} }
+  function renderCmsQuestions(){ const q=$('#cmsQuestionSearch')?.value.trim().toLowerCase()||''; const rows=(state.cms.questions||[]).filter(x=>!q||`${x.id} ${x.question}`.toLowerCase().includes(q)); $('#cmsQuestionList').innerHTML=rows.length?rows.map(x=>`<article class="cms-question-card ${x.active?'':'inactive'}"><div><span class="badge">${escapeHtml(x.level)}</span><strong>${escapeHtml(x.id)}</strong><p>${escapeHtml(x.question)}</p><small>Kunci: ${escapeHtml(x.answer)} · ${x.active?'Aktif':'Nonaktif'}</small></div><div><button class="button button-secondary button-small" type="button" data-question-edit="${escapeAttr(x.id)}">Edit</button><button class="button button-ghost button-small" type="button" data-question-toggle="${escapeAttr(x.id)}" data-active="${x.active?'0':'1'}">${x.active?'Nonaktifkan':'Aktifkan'}</button></div></article>`).join(''):'<p class="muted">Soal tidak ditemukan.</p>'; }
+  function handleQuestionListAction(event){ const edit=event.target.closest('[data-question-edit]'), toggle=event.target.closest('[data-question-toggle]'); if(edit){const item=state.cms.questions.find(x=>x.id===edit.dataset.questionEdit);openQuestionEditor(item);} if(toggle)toggleCmsQuestion(toggle.dataset.questionToggle,toggle.dataset.active==='1'); }
+  function openQuestionEditor(item=null){ populateCmsQuestionModules(); const selected=item?.module||$('#cmsQuestionModule').value||(state.cms.overview?.modules?.[0]?.name||''); $('#questionEditorHeading').textContent=item?'Edit soal':'Tambah soal'; $('#questionEditorId').value=item?.id||''; $('#questionEditorModule').value=selected; $('#questionEditorLevel').value=item?.level||'Medium'; $('#questionEditorText').value=item?.question||''; $('#questionOptionA').value=item?.optionA||''; $('#questionOptionB').value=item?.optionB||''; $('#questionOptionC').value=item?.optionC||''; $('#questionOptionD').value=item?.optionD||''; $('#questionAnswer').value=item?.answer||'A'; $('#questionExplanation').value=item?.explanation||''; $('#questionActive').checked=item?.active!==false; showDialog($('#questionEditorDialog')); }
+  async function saveCmsQuestion(){const payload={id:$('#questionEditorId').value,module:$('#questionEditorModule').value,level:$('#questionEditorLevel').value,question:$('#questionEditorText').value,optionA:$('#questionOptionA').value,optionB:$('#questionOptionB').value,optionC:$('#questionOptionC').value,optionD:$('#questionOptionD').value,answer:$('#questionAnswer').value,explanation:$('#questionExplanation').value,active:$('#questionActive').checked};setButtonBusyText($('#saveQuestionButton'),true,'Menyimpan…');try{const r=await api.adminSaveQuestion(payload);toast(r.message,'success');$('#questionEditorDialog').close();state.cms.overview=null;await loadCmsOverview(true);$('#cmsQuestionModule').value=payload.module;await loadCmsQuestions(payload.module);}catch(e){handleApiError(e);}finally{setButtonBusyText($('#saveQuestionButton'),false,'Simpan soal');}}
+  async function toggleCmsQuestion(id,active){try{const r=await api.adminSetQuestionActive({id,active});toast(r.message,'success');await loadCmsQuestions($('#cmsQuestionModule').value);}catch(e){handleApiError(e);}}
+
+  async function loadRoleUsers(){ if(!isSuperAdmin())return; $('#roleManagementBody').innerHTML=emptyRow(5,'Memuat akun…'); try{const result=await api.adminUsers();state.cms.users=result.users||[];renderRoleUsers();}catch(e){handleApiError(e);} }
+  function renderRoleUsers(){ const users=state.cms.users||[]; $('#roleManagementBody').innerHTML=users.length?users.map(user=>`<tr><td><strong>${escapeHtml(user.id)}</strong></td><td>${escapeHtml(user.name||'-')}</td><td>${accountStatusPill(user.status)}</td><td>${escapeHtml(user.role||'User')}</td><td><select class="role-select" data-role-user="${escapeAttr(user.id)}" ${String(user.id).toUpperCase()==='ADMIN'?'disabled':''}><option value="User" ${roleKey(user.role)==='user'?'selected':''}>User</option><option value="Trainer" ${roleKey(user.role)==='trainer'?'selected':''}>Trainer</option><option value="ContentAdmin" ${roleKey(user.role)==='contentadmin'?'selected':''}>ContentAdmin</option><option value="SuperAdmin" ${roleKey(user.role)==='superadmin'?'selected':''}>SuperAdmin</option></select></td></tr>`).join(''):emptyRow(5,'Belum ada akun.'); }
+  async function handleRoleChange(event){ const select=event.target.closest('[data-role-user]'); if(!select)return; const id=select.dataset.roleUser,role=select.value; showConfirm('Ubah role akun?',`${id} akan memiliki role ${role}.`,'Simpan role',async()=>{try{const r=await api.adminUpdateUserRole({id,role});toast(r.message,'success');await loadRoleUsers();if(id===state.user.id){await refreshBootstrap();configureUserUI();initializeAdminArea();}}catch(e){handleApiError(e);await loadRoleUsers();}}); }
+
+  function renderLearningBlocks(blocks){ return (Array.isArray(blocks)?blocks:[]).map(block=>{const type=String(block.type||'paragraph');if(type==='heading')return `<h4 class="learning-block-heading">${escapeHtml(block.text||'')}</h4>`;if(type==='paragraph')return `<p class="learning-block-paragraph">${escapeHtml(block.text||'')}</p>`;if(type==='highlight')return `<aside class="learning-highlight">${escapeHtml(block.text||'')}</aside>`;if(type==='formula')return `<pre class="learning-formula">${escapeHtml(block.text||'')}</pre>`;if(type==='bullets')return `<ul class="learning-block-bullets">${(block.items||[]).map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>`;if(type==='image'&&block.url)return `<figure class="learning-image"><img loading="lazy" decoding="async" src="${escapeAttr(block.url)}" alt="${escapeAttr(block.alt||'Visual materi')}"/>${block.caption?`<figcaption>${escapeHtml(block.caption)}</figcaption>`:''}</figure>`;if(type==='embed'&&block.url)return `<div class="learning-embed"><button class="button button-secondary button-small" type="button" data-embed-url="${escapeAttr(block.url)}">${escapeHtml(block.label||'Buka materi visual')}</button><a class="text-link" href="${escapeAttr(block.url)}" target="_blank" rel="noopener">Buka tab baru ↗</a>${block.caption?`<p>${escapeHtml(block.caption)}</p>`:''}<div class="embed-slot"></div></div>`;return '';}).join(''); }
+  function bindEmbedLoaders(root){ if(!root)return; $$('[data-embed-url]',root).forEach(btn=>btn.addEventListener('click',()=>{const wrap=btn.closest('.learning-embed'),slot=$('.embed-slot',wrap);if(slot.querySelector('iframe')){slot.innerHTML='';btn.textContent='Tampilkan materi';return;}const iframe=document.createElement('iframe');iframe.loading='lazy';iframe.src=btn.dataset.embedUrl;iframe.title=btn.textContent;iframe.referrerPolicy='no-referrer-when-downgrade';slot.appendChild(iframe);btn.textContent='Sembunyikan materi';})); }
+  function showDialog(dialog){ if(!dialog)return;if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open',''); }
+  function setButtonBusyText(button,busy,label){ if(!button)return;button.disabled=busy;button.textContent=label; }
+  function initRevealAnimations(){ if(!('IntersectionObserver' in window))return; const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('revealed');observer.unobserve(entry.target);}}),{threshold:.12}); $$('.reveal-on-scroll').forEach(el=>observer.observe(el)); }
+
   async function loadAdminDashboard() {
-    if (!isAdmin()) return;
+    if (!canMonitor()) return;
     const refreshButton = $('#refreshAdminUsers');
     if (refreshButton) refreshButton.disabled = true;
     try {
@@ -907,7 +1119,7 @@
   function clearLoginErrors() { $('#employeeIdError').textContent=''; $('#passwordError').textContent=''; }
   function clearRegisterErrors() { ['registerId','registerName','registerDepartment','registerLevel','registerPassword','registerPasswordConfirm','registerConsent'].forEach(id => { const el=$(`#${id}Error`); if(el) el.textContent=''; }); }
   function setButtonLoading(button, loading) { button.disabled=loading; $('.button-label',button)?.classList.toggle('hidden',loading); $('.spinner',button)?.classList.toggle('hidden',!loading); }
-  function isAdmin() { return String(state.user?.role || '').toLowerCase() === 'admin'; }
+  function isAdmin() { return hasAdminArea(); }
   function firstName(name) { return String(name || 'Peserta').trim().split(/\s+/)[0]; }
   function initials(name) { return String(name||'U').trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase(); }
   function readinessText(score, attempts) { if (!attempts) return 'Belum ada data'; if (score>=90) return 'Sangat siap'; if (score>=cfg.PASSING_SCORE) return 'Siap promosi'; if (score>=60) return 'Perlu penguatan'; return 'Perlu remedial'; }

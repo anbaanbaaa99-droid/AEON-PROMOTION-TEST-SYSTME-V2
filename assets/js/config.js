@@ -1,7 +1,7 @@
 /*
  * Konfigurasi frontend.
  * Ganti API_URL dengan URL deployment Google Apps Script (/exec).
- * Paket produksi v5.1 tidak otomatis masuk mode demo bila API belum dikonfigurasi.
+ * Paket produksi v5.6 tidak otomatis masuk mode demo bila API belum dikonfigurasi.
  */
 window.APP_CONFIG = Object.freeze({
   APP_NAME: 'AEON Learning & Promotion Test',
