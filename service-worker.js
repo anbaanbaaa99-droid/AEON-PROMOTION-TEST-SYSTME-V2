@@ -1,12 +1,12 @@
-const CACHE = 'aeon-promotion-test-v5-5';
+const CACHE = 'aeon-promotion-test-v5-6';
 const CORE = [
   './',
   'index.html',
   'manifest.webmanifest',
   'assets/icon.svg',
-  'assets/css/style.css?v=5.5.0',
-  'assets/js/api.js?v=5.5.0',
-  'assets/js/app.js?v=5.5.0'
+  'assets/css/style.css?v=5.6.0',
+  'assets/js/api.js?v=5.6.0',
+  'assets/js/app.js?v=5.6.0'
 ];
 
 self.addEventListener('install', event => {

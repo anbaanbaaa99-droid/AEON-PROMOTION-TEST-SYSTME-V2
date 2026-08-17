@@ -11,7 +11,7 @@
 <link href="assets/icon.svg" rel="icon" type="image/svg+xml"/>
 <link href="https://script.google.com" rel="preconnect"/>
 <link href="https://script.googleusercontent.com" rel="preconnect"/>
-<link href="assets/css/style.css?v=5.5.0" rel="stylesheet"/>
+<link href="assets/css/style.css?v=5.6.0" rel="stylesheet"/>
 <meta content="light dark" name="color-scheme"/></head>
 <body>
 <a class="skip-link" href="#mainContent">Lewati ke konten</a>
@@ -32,7 +32,6 @@
 </header>
 <main id="mainContent">
 <section class="auth-layout view" id="loginView">
-
 <div class="auth-panel auth-panel-centered"><div class="auth-card">
 <div class="brand brand-login">
 <span class="brand-mark">A</span>
@@ -87,7 +86,7 @@
 <a class="nav-link active" data-route-link="dashboard" href="#/dashboard"><span>01</span> Dashboard</a><a class="nav-link" data-route-link="modules" href="#/modules"><span>02</span> Baca Modul</a>
 <a class="nav-link" data-route-link="practice" href="#/practice"><span>03</span> Latihan</a>
 <a class="nav-link" data-route-link="history" href="#/history"><span>04</span> Riwayat</a>
-<a class="nav-link admin-only hidden" data-route-link="admin" href="#/admin"><span>05</span> Monitoring</a>
+<a class="nav-link admin-only hidden" data-route-link="admin" href="#/admin"><span>05</span> Admin</a>
 </nav>
 <div class="sidebar-help">
 <strong>Butuh bantuan?</strong>
@@ -146,7 +145,7 @@
 <div class="reader-section-nav"><span id="readerSectionIndex">Bagian 1/1</span><span class="reader-source-pages" id="readerSourcePages">Ringkasan materi</span></div>
 <div class="reader-pdf-tools hidden" id="readerPdfTools"><button class="button button-secondary button-small" id="readerPdfToggle" type="button">Tampilkan PDF</button><a class="button button-ghost button-small" href="#" id="readerPdfOpen" rel="noopener" target="_blank">Buka PDF asli ↗</a></div>
 <div class="reader-pdf-panel hidden" id="readerPdfPanel"><iframe id="readerPdfFrame" loading="lazy" title="PDF modul asli"></iframe></div>
-<section class="reader-article"><h3 id="readerSectionTitle"></h3><div class="reader-body" id="readerSectionBody"></div><ul class="reader-bullets" id="readerSectionBullets"></ul></section>
+<section class="reader-article"><h3 id="readerSectionTitle"></h3><div class="reader-body" id="readerSectionBody"></div><ul class="reader-bullets" id="readerSectionBullets"></ul><div class="reader-blocks" id="readerBlocks"></div></section>
 <footer class="reader-actions"><button class="button button-secondary" id="readerPrevious" type="button">← Sebelumnya</button><button class="button button-ghost" id="readerPracticeButton" type="button">Latihan soal modul ini</button><button class="button button-primary" id="readerNext" type="button">Berikutnya →</button></footer>
 </div>
 </article>
@@ -177,28 +176,35 @@
 </article>
 </section>
 <section class="page-section hidden" id="adminPage">
-<div class="page-heading"><div><p class="eyebrow">TRAINER MONITORING</p><h1>Monitoring peserta</h1><p class="muted">Identifikasi peserta dan modul yang memerlukan tindak lanjut.</p></div><button class="button button-secondary" id="exportAdminReport" type="button">Ekspor laporan</button></div><article class="panel approval-panel">
-<div class="panel-heading"><div><p class="panel-number">ACCOUNT ACCESS</p><h2>Approval akun peserta</h2><p class="muted">Akun baru tidak dapat login sebelum disetujui admin.</p></div><div><span class="mini-stat">Menunggu <strong id="adminPendingUsers">0</strong></span> <button class="button button-secondary button-small" id="refreshAdminUsers" type="button">Refresh</button></div></div>
+<div class="page-heading"><div><p class="eyebrow">ADMIN &amp; MAINTENANCE</p><h1>Learning Control Center</h1><p class="muted">Approval peserta, maintenance materi, soal, dan hak akses dalam satu tempat.</p></div><button class="button button-secondary monitoring-only" id="exportAdminReport" type="button">Ekspor laporan</button></div>
+<nav aria-label="Menu admin" class="admin-tabs">
+<button class="admin-tab monitoring-only" data-admin-tab="monitoring" type="button">Peserta</button>
+<button class="admin-tab content-only" data-admin-tab="content" type="button">Materi</button>
+<button class="admin-tab content-only" data-admin-tab="questions" type="button">Soal</button>
+<button class="admin-tab superadmin-only" data-admin-tab="roles" type="button">Peran</button>
+</nav>
+<div class="admin-tab-panel" data-admin-panel="monitoring" id="adminMonitoringTab">
+<article class="panel approval-panel">
+<div class="panel-heading"><div><p class="panel-number">PRIORITAS 01</p><h2>Approval akun peserta</h2><p class="muted">Akun baru tidak dapat login sebelum disetujui Trainer atau SuperAdmin.</p></div><div><span class="mini-stat">Menunggu <strong id="adminPendingUsers">0</strong></span> <button class="button button-secondary button-small" id="refreshAdminUsers" type="button">Refresh</button></div></div>
 <div class="filter-row"><label class="field compact"><span>Status akun</span><select id="adminAccountStatusFilter"><option value="">Semua status</option><option value="pending">Menunggu</option><option value="approved">Disetujui</option><option value="rejected">Ditolak</option></select></label><label class="field compact"><span>Cari akun</span><input id="adminAccountSearch" placeholder="ID, nama, departemen"/></label></div>
 <div class="table-wrap"><table><thead><tr><th>ID</th><th>Nama</th><th>Departemen</th><th>Level</th><th>Status</th><th>Modul Dibaca</th><th>Dibuat</th><th>Aksi</th></tr></thead><tbody id="adminAccountsBody"></tbody></table></div>
-</article><div class="stat-grid">
-<article class="stat-card"><span class="stat-icon">♙</span><div><small>Total peserta</small><strong id="adminTotalUsers">0</strong></div></article>
-<article class="stat-card"><span class="stat-icon">✓</span><div><small>Total percobaan</small><strong id="adminTotalAttempts">0</strong></div></article>
-<article class="stat-card"><span class="stat-icon">◎</span><div><small>Rata-rata nilai</small><strong id="adminAverageScore">0</strong></div></article>
-<article class="stat-card"><span class="stat-icon">!</span><div><small>Perlu remedial</small><strong id="adminRemedialCount">0</strong></div></article>
-</div><article class="panel">
-<div class="panel-heading"><div><h2>Hasil peserta</h2><p class="muted">Gunakan filter untuk menemukan peserta yang membutuhkan remedial.</p></div></div>
-<div class="filter-row"><label class="field compact"><span>Modul</span><select id="adminModuleFilter"><option value="">Semua modul</option></select></label><label class="field compact"><span>Status</span><select id="adminStatusFilter"><option value="">Semua status</option><option value="remedial">Perlu remedial</option><option value="passed">Lulus</option></select></label><label class="field compact"><span>Cari peserta</span><input id="adminSearch" placeholder="Nama, ID, departemen"/></label></div>
-<div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>ID</th><th>Nama</th><th>Departemen</th><th>Modul</th><th>Nilai</th><th>Grade</th></tr></thead><tbody id="adminResultsBody"></tbody></table></div>
-</article><div class="dashboard-grid">
-<article class="panel panel-wide"><div class="panel-heading"><div><h2>Rata-rata per modul</h2><p class="muted">Perbandingan performa seluruh peserta.</p></div></div><div class="bar-chart" id="adminModuleChart"></div></article>
-<article class="panel"><div class="panel-heading"><div><h2>Prioritas evaluasi</h2><p class="muted">Modul dengan capaian terendah.</p></div></div><div id="adminRecommendation"></div></article>
+</article>
+<div class="stat-grid"><article class="stat-card"><span class="stat-icon">♙</span><div><small>Total peserta</small><strong id="adminTotalUsers">0</strong></div></article><article class="stat-card"><span class="stat-icon">✓</span><div><small>Total percobaan</small><strong id="adminTotalAttempts">0</strong></div></article><article class="stat-card"><span class="stat-icon">◎</span><div><small>Rata-rata nilai</small><strong id="adminAverageScore">0</strong></div></article><article class="stat-card"><span class="stat-icon">!</span><div><small>Perlu remedial</small><strong id="adminRemedialCount">0</strong></div></article></div>
+<article class="panel"><div class="panel-heading"><div><h2>Hasil peserta</h2><p class="muted">Prioritaskan pencarian peserta yang memerlukan penguatan atau remedial.</p></div></div><div class="filter-row"><label class="field compact"><span>Modul</span><select id="adminModuleFilter"><option value="">Semua modul</option></select></label><label class="field compact"><span>Status</span><select id="adminStatusFilter"><option value="">Semua status</option><option value="remedial">Perlu remedial</option><option value="passed">Lulus</option></select></label><label class="field compact"><span>Cari peserta</span><input id="adminSearch" placeholder="Nama, ID, departemen"/></label></div><div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>ID</th><th>Nama</th><th>Departemen</th><th>Modul</th><th>Nilai</th><th>Grade</th></tr></thead><tbody id="adminResultsBody"></tbody></table></div></article>
+<div class="dashboard-grid"><article class="panel panel-wide"><div class="panel-heading"><div><h2>Rata-rata per modul</h2><p class="muted">Perbandingan performa seluruh peserta.</p></div></div><div class="bar-chart" id="adminModuleChart"></div></article><article class="panel"><div class="panel-heading"><div><h2>Prioritas evaluasi</h2><p class="muted">Modul dengan capaian terendah.</p></div></div><div id="adminRecommendation"></div></article></div>
 </div>
-
-
-
+<div class="admin-tab-panel hidden" data-admin-panel="content" id="adminContentTab">
+<article class="panel cms-hero"><div><p class="panel-number">PRIORITAS 02</p><h2>Kelola materi</h2><p class="muted">Edit sebagai draft, preview secara visual, lalu publish ketika materi sudah terverifikasi. Materi peserta tidak berubah sebelum Anda menekan Publish.</p></div><div class="cms-legend"><span class="account-status pending">Draft</span><span class="account-status approved">Published</span></div></article>
+<div class="cms-module-grid" id="cmsModuleList"><p class="muted">Memuat katalog materi…</p></div>
+</div>
+<div class="admin-tab-panel hidden" data-admin-panel="questions" id="adminQuestionsTab">
+<article class="panel"><div class="panel-heading"><div><p class="panel-number">PRIORITAS 03</p><h2>Kelola soal</h2><p class="muted">Soal dapat diedit tanpa menyentuh Code.gs. Perubahan langsung digunakan pada latihan setelah disimpan.</p></div><button class="button button-primary button-small" id="cmsAddQuestion" type="button">+ Tambah soal</button></div><div class="filter-row"><label class="field compact"><span>Modul</span><select id="cmsQuestionModule"><option value="">Pilih modul</option></select></label><label class="field compact"><span>Cari</span><input id="cmsQuestionSearch" placeholder="Cari ID atau pertanyaan"/></label></div><div class="cms-question-list" id="cmsQuestionList"><p class="muted">Pilih modul untuk melihat soal.</p></div></article>
+</div>
+<div class="admin-tab-panel hidden" data-admin-panel="roles" id="adminRolesTab">
+<article class="panel"><div class="panel-heading"><div><p class="panel-number">PRIORITAS 04</p><h2>Role &amp; permission</h2><p class="muted">SuperAdmin mengatur siapa yang boleh monitoring dan siapa yang boleh maintenance materi.</p></div><button class="button button-secondary button-small" id="refreshRoleUsers" type="button">Refresh</button></div><div class="role-guide"><div><strong>SuperAdmin</strong><span>Semua akses</span></div><div><strong>ContentAdmin</strong><span>Materi &amp; soal</span></div><div><strong>Trainer</strong><span>Approval &amp; monitoring</span></div><div><strong>User</strong><span>Belajar &amp; latihan</span></div></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>Nama</th><th>Status</th><th>Role saat ini</th><th>Ubah role</th></tr></thead><tbody id="roleManagementBody"></tbody></table></div></article>
+</div>
 </section>
-</div>
+<footer class="credit-scene reveal-on-scroll" id="finhCredit"><p>CREATED BY</p><strong>FINH.</strong><span>Design • Development • System</span><small>AEON Learning &amp; Promotion Test · 2026</small></footer></div>
 </section>
 <section class="quiz-layout view hidden" id="quizView">
 <header class="quiz-header">
@@ -233,11 +239,11 @@
 <article class="review-panel hidden" id="answerReviewPanel"><div class="panel-heading"><div><h2>Pembahasan jawaban</h2><p class="muted">Pelajari alasan dari setiap jawaban.</p></div><button aria-label="Tutup pembahasan" class="icon-button" id="closeReviewButton" type="button">×</button></div><div id="answerReviewList"></div></article>
 </section>
 </main>
-<dialog class="confirm-dialog" id="confirmDialog">
+<dialog class="editor-dialog" id="moduleEditorDialog"><form class="editor-shell" method="dialog"><header class="editor-header"><div><p class="eyebrow">CONTENT EDITOR</p><h2 id="cmsEditorHeading">Edit materi</h2><p class="muted" id="cmsEditorMeta"></p></div><button aria-label="Tutup editor" class="icon-button" value="cancel">×</button></header><div class="editor-body"><div class="field-grid two"><label class="field"><span>Judul modul</span><input id="cmsModuleTitle"/></label><label class="field"><span>Estimasi baca (menit)</span><input id="cmsModuleMinutes" max="180" min="1" type="number"/></label></div><label class="field"><span>Deskripsi</span><textarea id="cmsModuleDescription" rows="3"></textarea></label><label class="field"><span>PDF / dokumen sumber</span><input id="cmsModulePdf" placeholder="assets/modules/... atau https://..."/></label><div class="editor-toolbar"><strong>Bagian materi</strong><button class="button button-secondary button-small" id="cmsAddSection" type="button">+ Tambah bagian</button></div><div class="cms-sections" id="cmsSections"></div><article class="version-panel"><div class="panel-heading"><div><h3>Riwayat versi</h3><p class="muted">Rollback tidak menghapus riwayat; sistem membuat versi publish baru.</p></div><button class="button button-ghost button-small" id="cmsRefreshVersions" type="button">Muat versi</button></div><div class="version-list" id="cmsVersionList"></div></article></div><footer class="editor-footer"><button class="button button-secondary" id="cmsPreviewDraft" type="button">Preview</button><span class="editor-spacer"></span><button class="button button-secondary" id="cmsSaveDraft" type="button">Simpan draft</button><button class="button button-primary" id="cmsPublishModule" type="button">Publish</button></footer></form></dialog><dialog class="editor-dialog editor-dialog-small" id="questionEditorDialog"><form class="editor-shell" method="dialog"><header class="editor-header"><div><p class="eyebrow">QUESTION EDITOR</p><h2 id="questionEditorHeading">Tambah soal</h2></div><button aria-label="Tutup editor" class="icon-button" value="cancel">×</button></header><div class="editor-body"><input id="questionEditorId" type="hidden"/><div class="field-grid two"><label class="field"><span>Modul</span><select id="questionEditorModule"></select></label><label class="field"><span>Level</span><select id="questionEditorLevel"><option>Easy</option><option selected="">Medium</option><option>Hard</option></select></label></div><label class="field"><span>Pertanyaan</span><textarea id="questionEditorText" rows="3"></textarea></label><div class="field-grid two"><label class="field"><span>Opsi A</span><input id="questionOptionA"/></label><label class="field"><span>Opsi B</span><input id="questionOptionB"/></label><label class="field"><span>Opsi C</span><input id="questionOptionC"/></label><label class="field"><span>Opsi D</span><input id="questionOptionD"/></label></div><label class="field"><span>Kunci jawaban</span><select id="questionAnswer"><option>A</option><option>B</option><option>C</option><option>D</option></select></label><label class="field"><span>Pembahasan</span><textarea id="questionExplanation" rows="3"></textarea></label><label class="check-row"><input checked="" id="questionActive" type="checkbox"/><span>Soal aktif</span></label></div><footer class="editor-footer"><span class="editor-spacer"></span><button class="button button-primary" id="saveQuestionButton" type="button">Simpan soal</button></footer></form></dialog><dialog class="editor-dialog" id="draftPreviewDialog"><form class="editor-shell preview-shell" method="dialog"><header class="editor-header"><div><p class="eyebrow">PREVIEW PESERTA</p><h2 id="previewModuleTitle">Preview materi</h2></div><button aria-label="Tutup preview" class="icon-button" value="cancel">×</button></header><div class="editor-body"><div class="preview-sections" id="previewSections"></div></div></form></dialog><dialog class="confirm-dialog" id="confirmDialog">
 <form method="dialog"><h2 id="confirmTitle">Konfirmasi</h2><p id="confirmMessage">Apakah Anda yakin?</p><div class="dialog-actions"><button class="button button-secondary" value="cancel">Batal</button><button class="button button-danger" id="confirmAction" value="confirm">Ya, lanjutkan</button></div></form>
 </dialog>
-<script defer="" src="assets/js/config.js?v=5.5.0"></script>
-<script defer="" src="assets/js/api.js?v=5.5.0"></script>
-<script defer="" src="assets/js/app.js?v=5.5.0"></script>
+<script defer="" src="assets/js/config.js?v=5.6.0"></script>
+<script defer="" src="assets/js/api.js?v=5.6.0"></script>
+<script defer="" src="assets/js/app.js?v=5.6.0"></script>
 </body>
 </html>
