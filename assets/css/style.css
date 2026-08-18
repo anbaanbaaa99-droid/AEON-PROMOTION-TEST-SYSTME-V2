@@ -136,44 +136,135 @@ body.dark{--ink:#f8f4f7;--muted:#b9afb6;--line:#4a4147;--line-strong:#665b62;--b
 @media(max-width:760px){.cms-module-grid{grid-template-columns:1fr}.cms-hero{display:grid}.role-guide{grid-template-columns:repeat(2,1fr)}.editor-dialog{width:100vw;max-height:100svh;margin:0}.editor-shell{max-height:100svh;border-radius:0;border-left:0;border-right:0}.editor-header,.editor-footer{padding:12px}.editor-body{padding:12px}.editor-footer{display:grid;grid-template-columns:1fr 1fr}.editor-spacer{display:none}.editor-footer .button{width:100%}.editor-footer #cmsPreviewDraft{grid-column:1/-1}.cms-section-card{padding:11px}.cms-block-top{grid-template-columns:1fr auto auto auto}.cms-question-card{display:grid}.cms-question-card>div:last-child .button{flex:1}.learning-embed{grid-template-columns:1fr}.learning-embed .button,.learning-embed .text-link{width:100%;text-align:center}.credit-scene{min-height:38vh;margin-top:28px}.credit-scene strong{font-size:3.4rem}.admin-tabs{position:sticky;top:calc(var(--topbar) + 4px);z-index:10;padding:6px;background:var(--bg);border-radius:999px}.role-select{width:100%;min-width:130px}}
 @media(max-width:480px){.role-guide{grid-template-columns:1fr}.cms-section-card>header{grid-template-columns:30px 1fr}.cms-section-card>header>div{grid-column:1/-1;justify-content:flex-end}.editor-footer{grid-template-columns:1fr}.editor-footer #cmsPreviewDraft{grid-column:auto}.cms-block-top{grid-template-columns:1fr auto auto auto}.preview-section{padding:15px}}
 
-/* FIX v5.6.1 - Editor labels Android */
-.editor-dialog,
-.editor-shell,
-.editor-header,
-.editor-body,
-.editor-footer,
-.cms-section-card,
-.cms-block-card {
-  color: var(--ink) !important;
+/* ==========================================================
+   v5.6.1 — Android editor visibility fix
+   Dialog editor sengaja menggunakan light surface yang eksplisit.
+   Ini mencegah warna label/field hilang pada Chrome Android,
+   forced dark mode, dan saat custom property body berubah.
+   ========================================================== */
+.editor-dialog{
+  --editor-ink:#171417;
+  --editor-muted:#716a70;
+  --editor-line:#ddd5d9;
+  --editor-line-strong:#bdb2b8;
+  --editor-surface:#fffdfb;
+  --editor-surface-2:#f7f2ed;
+  color:#171417 !important;
+  color-scheme:light;
 }
-
-.editor-dialog .field > span,
-.editor-dialog label,
-.editor-dialog strong,
-.editor-dialog h2,
-.editor-dialog h3,
-.editor-dialog p {
-  color: var(--ink);
+.editor-dialog .editor-shell,
+.editor-dialog .editor-header,
+.editor-dialog .editor-body,
+.editor-dialog .editor-footer,
+.editor-dialog .cms-section-card,
+.editor-dialog .cms-block-card,
+.editor-dialog .version-panel,
+.editor-dialog .preview-section{
+  color:var(--editor-ink) !important;
 }
-
-.editor-dialog input,
+.editor-dialog .editor-shell,
+.editor-dialog .editor-header,
+.editor-dialog .editor-footer,
+.editor-dialog .cms-section-card,
+.editor-dialog .preview-section{
+  background:var(--editor-surface) !important;
+}
+.editor-dialog .cms-block-card{
+  background:var(--editor-surface-2) !important;
+}
+.editor-dialog .editor-header h2,
+.editor-dialog .editor-header strong,
+.editor-dialog .editor-toolbar strong,
+.editor-dialog .cms-block-heading strong,
+.editor-dialog .cms-section-card header strong,
+.editor-dialog .version-panel h3,
+.editor-dialog .check-row span{
+  color:var(--editor-ink) !important;
+  -webkit-text-fill-color:var(--editor-ink) !important;
+  opacity:1 !important;
+}
+.editor-dialog .editor-header .muted,
+.editor-dialog .version-panel .muted,
+.editor-dialog .field-hint{
+  color:var(--editor-muted) !important;
+  -webkit-text-fill-color:var(--editor-muted) !important;
+  opacity:1 !important;
+}
+.editor-dialog .eyebrow{
+  color:#97005f !important;
+  -webkit-text-fill-color:#97005f !important;
+  opacity:1 !important;
+}
+.editor-dialog label.field{
+  display:grid !important;
+  gap:7px !important;
+}
+.editor-dialog label.field > span:first-child{
+  display:block !important;
+  min-height:18px;
+  color:var(--editor-ink) !important;
+  -webkit-text-fill-color:var(--editor-ink) !important;
+  font-size:.78rem !important;
+  font-weight:900 !important;
+  line-height:1.35 !important;
+  opacity:1 !important;
+  visibility:visible !important;
+}
+.editor-dialog input:not([type="checkbox"]),
 .editor-dialog textarea,
-.editor-dialog select {
-  color: #171417 !important;
-  -webkit-text-fill-color: #171417 !important;
-  background: #fff !important;
+.editor-dialog select,
+.editor-dialog .cms-block-top select,
+.editor-dialog .role-select{
+  color:var(--editor-ink) !important;
+  -webkit-text-fill-color:var(--editor-ink) !important;
+  background:#fff !important;
+  border-color:var(--editor-line-strong) !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  color-scheme:light;
 }
-
+.editor-dialog select option{
+  color:#171417 !important;
+  background:#fff !important;
+}
 .editor-dialog input::placeholder,
-.editor-dialog textarea::placeholder {
-  color: #8a8287 !important;
-  opacity: 1;
+.editor-dialog textarea::placeholder{
+  color:#8a8287 !important;
+  -webkit-text-fill-color:#8a8287 !important;
+  opacity:1 !important;
+}
+.editor-dialog .icon-button,
+.editor-dialog .button-secondary,
+.editor-dialog .button-ghost{
+  color:var(--editor-ink) !important;
+  -webkit-text-fill-color:var(--editor-ink) !important;
+  background:#fff !important;
+  border-color:var(--editor-line-strong) !important;
+}
+.editor-dialog .icon-button.danger{
+  color:#ba3348 !important;
+  -webkit-text-fill-color:#ba3348 !important;
+}
+.editor-dialog .button-primary{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  background:#97005f !important;
+}
+.editor-dialog .check-row{
+  color:var(--editor-ink) !important;
+}
+.editor-dialog input[type="checkbox"]{
+  accent-color:#97005f;
 }
 
-.editor-dialog .muted {
-  color: var(--muted) !important;
-}
-
-.editor-dialog .eyebrow {
-  color: var(--primary) !important;
+/* Mobile editor: field names selalu berada di atas input dan mudah dibaca. */
+@media(max-width:760px){
+  .editor-dialog .editor-body{padding:14px !important}
+  .editor-dialog .field{margin-bottom:16px !important}
+  .editor-dialog label.field > span:first-child{font-size:.82rem !important}
+  .editor-dialog input:not([type="checkbox"]),
+  .editor-dialog select{min-height:48px !important}
+  .editor-dialog textarea{min-height:96px}
+  .editor-dialog .cms-section-card{padding:13px !important}
+  .editor-dialog .cms-section-card>header{margin-bottom:16px}
 }
