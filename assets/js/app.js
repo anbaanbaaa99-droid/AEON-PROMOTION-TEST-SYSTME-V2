@@ -140,7 +140,7 @@
     box.classList.remove('ok','demo','error');
     if (api.demoMode) {
       box.classList.add('demo');
-      text.textContent = 'Mode demo — backend belum digunakan';
+      text.textContent = 'Mode demo â€” backend belum digunakan';
       demoBox?.classList.remove('hidden');
       return;
     }
@@ -154,7 +154,7 @@
     try {
       const health = await api.health();
       box.classList.add('ok');
-      text.textContent = `Server terhubung${health?.version ? ' · v'+health.version : ''}`;
+      text.textContent = `Server terhubung${health?.version ? ' Â· v'+health.version : ''}`;
     } catch (error) {
       box.classList.add('error');
       text.textContent = 'Server tidak dapat dijangkau';
@@ -177,7 +177,7 @@
       const result = await api.login(id, password);
       loginSucceeded = true;
       state.user = result.user;
-      toast('Login berhasil. Memuat dashboard…', 'success');
+      toast('Login berhasil. Memuat dashboardâ€¦', 'success');
       await loadApplication();
       toast(`Selamat datang, ${state.user.name}.`, 'success');
     } catch (error) {
@@ -226,7 +226,7 @@
     let invalid = false;
 
     if (!/^[A-Za-z0-9._-]{4,30}$/.test(payload.id)) {
-      $('#registerIdError').textContent = 'Gunakan 4–30 karakter: huruf, angka, titik, strip, atau underscore.'; invalid = true;
+      $('#registerIdError').textContent = 'Gunakan 4â€“30 karakter: huruf, angka, titik, strip, atau underscore.'; invalid = true;
     }
     if (payload.name.length < 3) { $('#registerNameError').textContent = 'Nama lengkap wajib diisi.'; invalid = true; }
     if (!payload.department) { $('#registerDepartmentError').textContent = 'Departemen / divisi wajib diisi.'; invalid = true; }
@@ -290,7 +290,7 @@
     $('#quizView').classList.add('hidden');
     $('#resultView').classList.add('hidden');
     $('#loginView').classList.remove('hidden');
-    document.title = `Login · ${cfg.APP_NAME}`;
+    document.title = `Login Â· ${cfg.APP_NAME}`;
     switchAuthMode('login');
     const demoBox = $('#demoCredentials');
     if (demoBox) demoBox.classList.toggle('hidden', !api.demoMode);
@@ -310,7 +310,7 @@
     $$('.page-section').forEach(section => section.classList.add('hidden'));
     $(`#${routeName}Page`).classList.remove('hidden');
     $$('[data-route-link]').forEach(link => link.classList.toggle('active', link.dataset.routeLink === routeName));
-    document.title = `${capitalize(routeName)} · ${cfg.APP_NAME}`;
+    document.title = `${capitalize(routeName)} Â· ${cfg.APP_NAME}`;
     if (routeName === 'admin') initializeAdminArea();
     if (routeName === 'modules') renderReadingLibrary();
     window.scrollTo({ top:0, behavior:'auto' });
@@ -342,7 +342,7 @@
       || progress.filter(item => item.attempts === 0)[0]
       || progress.sort((a,b)=>a.bestScore-b.bestScore)[0];
     $('#recommendationCard').innerHTML = target ? `
-      <span class="big-icon">🎯</span><h3>${target.attempts ? 'Perkuat ' : 'Mulai dari '}${escapeHtml(target.module)}</h3>
+      <span class="big-icon">ðŸŽ¯</span><h3>${target.attempts ? 'Perkuat ' : 'Mulai dari '}${escapeHtml(target.module)}</h3>
       <p>${target.attempts ? `Nilai terbaik saat ini ${target.bestScore}. Pelajari ulang bagian yang belum dikuasai dan coba latihan baru.` : 'Modul ini belum pernah dikerjakan. Mulai latihan singkat untuk mengukur pemahaman.'}</p>
       <button class="button button-primary button-small" type="button" data-recommend-module="${escapeAttr(target.module)}">Latihan modul</button>` : '<p class="muted">Belum ada rekomendasi.</p>';
     $('[data-recommend-module]')?.addEventListener('click', event => { selectModule(event.currentTarget.dataset.recommendModule); navigate('practice'); });
@@ -431,7 +431,7 @@
     $('#readerModuleCode').textContent = module.name || 'MODULE';
     $('#readerTitle').textContent = module.title || module.name || 'Modul';
     $('#readerSummary').textContent = module.summary || module.description || '';
-    $('#readerMinutes').textContent = `± ${Number(module.readingMinutes)||5} menit`;
+    $('#readerMinutes').textContent = `Â± ${Number(module.readingMinutes)||5} menit`;
     $('#readerProgressText').textContent = `${progress}%`;
     $('#readerProgressBar').style.width = `${progress}%`;
     $('#readerSectionIndex').textContent = `Bagian ${index + 1}/${sections.length}`;
@@ -457,7 +457,7 @@
     $('#readerBlocks').innerHTML = renderLearningBlocks(Array.isArray(section.blocks) ? section.blocks : []);
     bindEmbedLoaders($('#readerBlocks'));
     $('#readerPrevious').disabled = index === 0;
-    $('#readerNext').textContent = index === sections.length - 1 ? (progress >= 100 ? 'Sudah selesai ✓' : 'Tandai selesai ✓') : 'Berikutnya →';
+    $('#readerNext').textContent = index === sections.length - 1 ? (progress >= 100 ? 'Sudah selesai âœ“' : 'Tandai selesai âœ“') : 'Berikutnya â†’';
     $('#readerNext').disabled = reading.saving || (index === sections.length - 1 && progress >= 100);
     $('#readerCompleteBadge').textContent = progress >= 100 ? 'Selesai' : progress > 0 ? 'Sedang dibaca' : 'Belum selesai';
     $('#readerCompleteBadge').className = `account-status ${progress >= 100 ? 'approved' : 'pending'}`;
@@ -526,7 +526,7 @@
       return `<button class="module-card ${state.selectedModule === module.name ? 'selected' : ''}" type="button" data-module="${escapeAttr(module.name)}">
         <header><h3>${escapeHtml(module.name)}</h3><small>${Number(module.questionCount)||0} soal</small></header>
         <p>${escapeHtml(module.description || moduleDescriptions[module.name] || 'Materi promotion test')}</p>
-        <p><strong>Nilai terbaik: ${Number(progress.bestScore)||0}</strong> · ${Number(progress.attempts)||0} percobaan · ${module.hasMaterial === false ? 'tanpa materi baca' : 'materi baca tersedia'}</p>
+        <p><strong>Nilai terbaik: ${Number(progress.bestScore)||0}</strong> Â· ${Number(progress.attempts)||0} percobaan Â· ${module.hasMaterial === false ? 'tanpa materi baca' : 'materi baca tersedia'}</p>
       </button>`;
     }).join('');
     $$('[data-module]', $('#moduleCards')).forEach(button => button.addEventListener('click', () => selectModule(button.dataset.module)));
@@ -585,7 +585,7 @@
     $('#resultView').classList.add('hidden');
     $('#quizView').classList.remove('hidden');
     $('#quizModuleLabel').textContent = state.currentQuiz.module;
-    document.title = `${state.currentQuiz.module} · Ujian`;
+    document.title = `${state.currentQuiz.module} Â· Ujian`;
     renderQuestionPalette();
     renderCurrentQuestion();
     startQuizTimer();
@@ -614,7 +614,7 @@
     $$('[data-answer-key]', $('#answerOptions')).forEach(button => button.addEventListener('click', () => chooseAnswer(button.dataset.answerKey)));
     $('#flagQuestion').checked = quiz.flags.has(question.id);
     $('#previousQuestion').disabled = quiz.index === 0;
-    $('#nextQuestion').textContent = quiz.index === quiz.questions.length - 1 ? 'Selesaikan →' : 'Berikutnya →';
+    $('#nextQuestion').textContent = quiz.index === quiz.questions.length - 1 ? 'Selesaikan â†’' : 'Berikutnya â†’';
     updatePaletteState();
   }
 
@@ -716,7 +716,7 @@
     $('#resultView').classList.remove('hidden');
     $('#answerReviewPanel').classList.add('hidden');
     const passed = Number(result.score) >= cfg.PASSING_SCORE;
-    $('#resultStatusIcon').textContent = passed ? '✓' : '!';
+    $('#resultStatusIcon').textContent = passed ? 'âœ“' : '!';
     $('#resultStatusIcon').classList.toggle('fail', !passed);
     $('#resultHeadline').textContent = passed ? 'Selamat, target tercapai!' : 'Tetap semangat, perlu penguatan';
     $('#resultMessage').textContent = `${result.module} telah selesai dikerjakan.`;
@@ -728,7 +728,7 @@
     $('#resultRecommendation').textContent = result.recommendation || (passed ? 'Lanjutkan ke modul berikutnya.' : 'Pelajari kembali pembahasan dan lakukan remedial.');
     renderAnswerReview(result.review || []);
     $('#reviewAnswersButton').classList.toggle('hidden', !(result.review || []).length);
-    document.title = `Hasil ${result.module} · ${cfg.APP_NAME}`;
+    document.title = `Hasil ${result.module} Â· ${cfg.APP_NAME}`;
     window.scrollTo(0,0);
   }
 
@@ -736,7 +736,7 @@
     $('#answerReviewList').innerHTML = review.map(item => `
       <article class="review-item ${item.isCorrect ? 'correct' : 'incorrect'}">
         <h3>${item.number}. ${escapeHtml(item.question)}</h3>
-        <p><strong>Jawaban Anda:</strong> ${escapeHtml(item.selectedText || 'Tidak dijawab')} ${item.isCorrect ? '✓' : '✕'}</p>
+        <p><strong>Jawaban Anda:</strong> ${escapeHtml(item.selectedText || 'Tidak dijawab')} ${item.isCorrect ? 'âœ“' : 'âœ•'}</p>
         ${item.isCorrect ? '' : `<p><strong>Jawaban benar:</strong> ${escapeHtml(item.correctText || '')}</p>`}
         <p class="explanation"><strong>Pembahasan:</strong> ${escapeHtml(item.explanation || 'Belum tersedia.')}</p>
       </article>`).join('');
@@ -803,7 +803,7 @@
     if (!canManageContent()) return;
     if (state.cms.overview && !force) { renderCmsModules(); populateCmsQuestionModules(); return; }
     const list = $('#cmsModuleList');
-    if (list) list.innerHTML = '<p class="muted">Memuat katalog materi…</p>';
+    if (list) list.innerHTML = '<p class="muted">Memuat katalog materiâ€¦</p>';
     try {
       state.cms.overview = await api.adminCmsOverview();
       renderCmsModules();
@@ -820,7 +820,7 @@
         <header><div><p class="eyebrow">${escapeHtml(module.name)}</p><h3>${escapeHtml(module.title)}</h3></div><span class="account-status ${String(module.status).toLowerCase()==='draft'?'pending':'approved'}">${escapeHtml(module.status || 'Published')}</span></header>
         <p>${escapeHtml(module.description || '')}</p>
         <div class="cms-card-meta"><span>${Number(module.sectionCount)||0} bagian</span><span>${Number(module.questionCount)||0} soal</span><span>v${Number(module.version)||1}</span></div>
-        <small>Update: ${module.updatedAt ? formatDate(module.updatedAt) : '-'} · ${escapeHtml(module.updatedBy || 'SYSTEM')}</small>
+        <small>Update: ${module.updatedAt ? formatDate(module.updatedAt) : '-'} Â· ${escapeHtml(module.updatedBy || 'SYSTEM')}</small>
         <div class="cms-card-actions"><button class="button button-primary button-small" type="button" data-cms-edit="${escapeAttr(module.name)}">Edit materi</button><button class="button button-secondary button-small" type="button" data-cms-questions="${escapeAttr(module.name)}">Kelola soal</button></div>
       </article>`).join('') : '<p class="muted">Belum ada modul.</p>';
     $$('[data-cms-edit]', container).forEach(button => button.addEventListener('click', () => openModuleEditor(button.dataset.cmsEdit)));
@@ -841,7 +841,7 @@
       const response = await api.adminGetModuleDraft(moduleName);
       state.cms.editing = response.module;
       $('#cmsEditorHeading').textContent = response.module.title || response.module.name;
-      $('#cmsEditorMeta').textContent = `${response.module.name} · ${response.module.status} · v${response.module.version}`;
+      $('#cmsEditorMeta').textContent = `${response.module.name} Â· ${response.module.status} Â· v${response.module.version}`;
       $('#cmsModuleTitle').value = response.module.title || '';
       $('#cmsModuleDescription').value = response.module.description || '';
       $('#cmsModuleMinutes').value = response.module.readingMinutes || 5;
@@ -864,11 +864,11 @@
   function cmsSectionHtml(section,index) {
     const blocks = Array.isArray(section.blocks)?section.blocks:[];
     return `<article class="cms-section-card" data-section-index="${index}">
-      <header><span>${String(index+1).padStart(2,'0')}</span><strong>${escapeHtml(section.title || `Bagian ${index+1}`)}</strong><div><button class="icon-button mini" type="button" data-section-action="up">↑</button><button class="icon-button mini" type="button" data-section-action="down">↓</button><button class="icon-button mini danger" type="button" data-section-action="delete">×</button></div></header>
-      <label class="field"><span>Judul bagian</span><input class="cms-section-title" value="${escapeAttr(section.title||'')}"/></label>
-      <label class="field"><span>Paragraf utama</span><textarea class="cms-section-body" rows="4">${escapeHtml(section.body||'')}</textarea></label>
-      <label class="field"><span>Bullet (1 baris = 1 poin)</span><textarea class="cms-section-bullets" rows="3">${escapeHtml((section.bullets||[]).join('\n'))}</textarea></label>
-      <label class="field"><span>Referensi halaman</span><input class="cms-section-pages" value="${escapeAttr(section.sourcePages||'')}" placeholder="Contoh: 12-15"/></label>
+      <header><span>${String(index+1).padStart(2,'0')}</span><strong>${escapeHtml(section.title || `Bagian ${index+1}`)}</strong><div><button class="icon-button mini" type="button" data-section-action="up">â†‘</button><button class="icon-button mini" type="button" data-section-action="down">â†“</button><button class="icon-button mini danger" type="button" data-section-action="delete">Ã—</button></div></header>
+      <label class="field"><span>Judul bagian</span><input class="cms-section-title" value="${escapeAttr(section.title||'')}" placeholder="Contoh: Kesamaan persepsi sebagai dasar komunikasi" aria-label="Judul bagian"/></label>
+      <label class="field"><span>Paragraf utama</span><textarea class="cms-section-body" rows="4" placeholder="Tuliskan penjelasan utama bagian ini" aria-label="Paragraf utama">${escapeHtml(section.body||'')}</textarea></label>
+      <label class="field"><span>Bullet (1 baris = 1 poin)</span><textarea class="cms-section-bullets" rows="3" placeholder="Satu poin per baris" aria-label="Bullet">${escapeHtml((section.bullets||[]).join('\n'))}</textarea></label>
+      <label class="field"><span>Referensi halaman</span><input class="cms-section-pages" value="${escapeAttr(section.sourcePages||'')}" placeholder="Contoh halaman sumber: 12-15" aria-label="Referensi halaman"/></label>
       <div class="cms-block-heading"><strong>Konten visual tambahan</strong><button class="button button-ghost button-small" type="button" data-section-action="add-block">+ Tambah blok</button></div>
       <div class="cms-block-list">${blocks.map((block,blockIndex)=>cmsBlockHtml(block,blockIndex)).join('')}</div>
     </article>`;
@@ -878,8 +878,8 @@
     const type=block.type||'paragraph';
     const isMedia=['image','embed'].includes(type), isBullets=type==='bullets';
     const textValue=isBullets?(block.items||[]).join('\n'):(block.text||block.alt||block.label||'');
-    return `<div class="cms-block-card" data-block-index="${index}"><div class="cms-block-top"><select class="cms-block-type"><option value="paragraph" ${type==='paragraph'?'selected':''}>Paragraf</option><option value="heading" ${type==='heading'?'selected':''}>Subjudul</option><option value="bullets" ${type==='bullets'?'selected':''}>Bullet</option><option value="highlight" ${type==='highlight'?'selected':''}>Highlight</option><option value="formula" ${type==='formula'?'selected':''}>Formula</option><option value="image" ${type==='image'?'selected':''}>Gambar</option><option value="embed" ${type==='embed'?'selected':''}>Embed PPT/Doc</option></select><button class="icon-button mini" type="button" data-block-action="up">↑</button><button class="icon-button mini" type="button" data-block-action="down">↓</button><button class="icon-button mini danger" type="button" data-block-action="delete">×</button></div>
-      ${isMedia?`<label class="field"><span>URL</span><input class="cms-block-url" value="${escapeAttr(block.url||'')}" placeholder="https://... atau assets/..."/></label><label class="field"><span>${type==='image'?'Alt text':'Label tombol'}</span><input class="cms-block-text" value="${escapeAttr(textValue)}"/></label><label class="field"><span>Caption</span><input class="cms-block-meta" value="${escapeAttr(block.caption||'')}"/></label>`:`<label class="field"><span>${isBullets?'Isi (1 baris = 1 poin)':'Isi blok'}</span><textarea class="cms-block-text" rows="3">${escapeHtml(textValue)}</textarea></label>`}
+    return `<div class="cms-block-card" data-block-index="${index}"><div class="cms-block-top"><select class="cms-block-type"><option value="paragraph" ${type==='paragraph'?'selected':''}>Paragraf</option><option value="heading" ${type==='heading'?'selected':''}>Subjudul</option><option value="bullets" ${type==='bullets'?'selected':''}>Bullet</option><option value="highlight" ${type==='highlight'?'selected':''}>Highlight</option><option value="formula" ${type==='formula'?'selected':''}>Formula</option><option value="image" ${type==='image'?'selected':''}>Gambar</option><option value="embed" ${type==='embed'?'selected':''}>Embed PPT/Doc</option></select><button class="icon-button mini" type="button" data-block-action="up">â†‘</button><button class="icon-button mini" type="button" data-block-action="down">â†“</button><button class="icon-button mini danger" type="button" data-block-action="delete">Ã—</button></div>
+      ${isMedia?`<label class="field"><span>URL</span><input class="cms-block-url" value="${escapeAttr(block.url||'')}" placeholder="https://... atau assets/..."/></label><label class="field"><span>${type==='image'?'Alt text':'Label tombol'}</span><input class="cms-block-text" value="${escapeAttr(textValue)}"/></label><label class="field"><span>Caption</span><input class="cms-block-meta" value="${escapeAttr(block.caption||'')}"/></label>`:`<label class="field"><span>${isBullets?'Isi (1 baris = 1 poin)':'Isi blok'}</span><textarea class="cms-block-text" rows="3" placeholder="Isi konten blok ini" aria-label="Isi blok">${escapeHtml(textValue)}</textarea></label>`}
     </div>`;
   }
 
@@ -927,25 +927,25 @@
 
   function cmsPayload() { syncCmsEditorFromDom(); const m=state.cms.editing; return {module:m.name,title:m.title,description:m.description,readingMinutes:m.readingMinutes,sourcePdf:m.sourcePdf,sections:m.sections,active:m.active!==false}; }
 
-  async function saveCmsDraft() { if(!state.cms.editing)return false; setButtonBusyText($('#cmsSaveDraft'),true,'Menyimpan…'); try{ const result=await api.adminSaveModuleDraft(cmsPayload()); state.cms.editing=result.module; toast(result.message||'Draft tersimpan.','success'); state.cms.overview=null; renderCmsSections(); $('#cmsEditorMeta').textContent=`${result.module.name} · Draft · v${result.module.version}`; return true; }catch(e){handleApiError(e);return false;}finally{setButtonBusyText($('#cmsSaveDraft'),false,'Simpan draft');} }
-  async function publishCmsModule() { if(!state.cms.editing)return; const saved=await saveCmsDraft(); if(!saved)return; showConfirm('Publish materi?','Versi yang sedang digunakan peserta akan diganti dengan draft ini. Riwayat versi lama tetap disimpan.','Publish',async()=>{ try{ const result=await api.adminPublishModule(state.cms.editing.name); toast(result.message,'success'); state.cms.overview=null; const fresh=await api.adminGetModuleDraft(state.cms.editing.name); state.cms.editing=fresh.module; $('#cmsEditorMeta').textContent=`${fresh.module.name} · Published · v${fresh.module.version}`; await loadCmsOverview(true); await refreshBootstrap(); }catch(e){handleApiError(e);} }); }
+  async function saveCmsDraft() { if(!state.cms.editing)return false; setButtonBusyText($('#cmsSaveDraft'),true,'Menyimpanâ€¦'); try{ const result=await api.adminSaveModuleDraft(cmsPayload()); state.cms.editing=result.module; toast(result.message||'Draft tersimpan.','success'); state.cms.overview=null; renderCmsSections(); $('#cmsEditorMeta').textContent=`${result.module.name} Â· Draft Â· v${result.module.version}`; return true; }catch(e){handleApiError(e);return false;}finally{setButtonBusyText($('#cmsSaveDraft'),false,'Simpan draft');} }
+  async function publishCmsModule() { if(!state.cms.editing)return; const saved=await saveCmsDraft(); if(!saved)return; showConfirm('Publish materi?','Versi yang sedang digunakan peserta akan diganti dengan draft ini. Riwayat versi lama tetap disimpan.','Publish',async()=>{ try{ const result=await api.adminPublishModule(state.cms.editing.name); toast(result.message,'success'); state.cms.overview=null; const fresh=await api.adminGetModuleDraft(state.cms.editing.name); state.cms.editing=fresh.module; $('#cmsEditorMeta').textContent=`${fresh.module.name} Â· Published Â· v${fresh.module.version}`; await loadCmsOverview(true); await refreshBootstrap(); }catch(e){handleApiError(e);} }); }
 
   function previewCmsDraft() { if(!state.cms.editing)return; syncCmsEditorFromDom(); $('#previewModuleTitle').textContent=state.cms.editing.title||state.cms.editing.name; $('#previewSections').innerHTML=(state.cms.editing.sections||[]).map((section,i)=>`<article class="preview-section"><p class="eyebrow">BAGIAN ${i+1}/${state.cms.editing.sections.length}</p><h3>${escapeHtml(section.title||'')}</h3>${String(section.body||'').split(/\n{2,}/).filter(Boolean).map(x=>`<p>${escapeHtml(x)}</p>`).join('')}${section.bullets?.length?`<ul>${section.bullets.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>`:''}${renderLearningBlocks(section.blocks||[])}</article>`).join(''); bindEmbedLoaders($('#previewSections')); showDialog($('#draftPreviewDialog')); }
 
-  async function loadCmsVersions(){ if(!state.cms.editing)return; const box=$('#cmsVersionList'); box.innerHTML='<p class="muted">Memuat versi…</p>'; try{const result=await api.adminModuleVersions(state.cms.editing.name); box.innerHTML=(result.versions||[]).map(v=>`<div class="version-row"><span><strong>v${v.version}</strong><small>${v.publishedAt?formatDate(v.publishedAt):'-'} · ${escapeHtml(v.publishedBy||'-')}</small></span><button class="button button-ghost button-small" type="button" data-rollback-version="${v.version}">Rollback</button></div>`).join('')||'<p class="muted">Belum ada riwayat versi.</p>'; $$('[data-rollback-version]',box).forEach(btn=>btn.addEventListener('click',()=>showConfirm(`Rollback ke v${btn.dataset.rollbackVersion}?`,'Konten versi lama akan dipublish sebagai versi baru.','Rollback',async()=>{try{const r=await api.adminRollbackModule(state.cms.editing.name,Number(btn.dataset.rollbackVersion));toast(r.message,'success');state.cms.overview=null;await openModuleEditor(state.cms.editing.name);}catch(e){handleApiError(e);}})));}catch(e){handleApiError(e);} }
+  async function loadCmsVersions(){ if(!state.cms.editing)return; const box=$('#cmsVersionList'); box.innerHTML='<p class="muted">Memuat versiâ€¦</p>'; try{const result=await api.adminModuleVersions(state.cms.editing.name); box.innerHTML=(result.versions||[]).map(v=>`<div class="version-row"><span><strong>v${v.version}</strong><small>${v.publishedAt?formatDate(v.publishedAt):'-'} Â· ${escapeHtml(v.publishedBy||'-')}</small></span><button class="button button-ghost button-small" type="button" data-rollback-version="${v.version}">Rollback</button></div>`).join('')||'<p class="muted">Belum ada riwayat versi.</p>'; $$('[data-rollback-version]',box).forEach(btn=>btn.addEventListener('click',()=>showConfirm(`Rollback ke v${btn.dataset.rollbackVersion}?`,'Konten versi lama akan dipublish sebagai versi baru.','Rollback',async()=>{try{const r=await api.adminRollbackModule(state.cms.editing.name,Number(btn.dataset.rollbackVersion));toast(r.message,'success');state.cms.overview=null;await openModuleEditor(state.cms.editing.name);}catch(e){handleApiError(e);}})));}catch(e){handleApiError(e);} }
 
-  async function loadCmsQuestions(moduleName){ if(!canManageContent()||!moduleName)return; $('#cmsQuestionList').innerHTML='<p class="muted">Memuat soal…</p>'; try{const result=await api.adminQuestions(moduleName); state.cms.questions=result.questions||[]; renderCmsQuestions();}catch(e){handleApiError(e);} }
-  function renderCmsQuestions(){ const q=$('#cmsQuestionSearch')?.value.trim().toLowerCase()||''; const rows=(state.cms.questions||[]).filter(x=>!q||`${x.id} ${x.question}`.toLowerCase().includes(q)); $('#cmsQuestionList').innerHTML=rows.length?rows.map(x=>`<article class="cms-question-card ${x.active?'':'inactive'}"><div><span class="badge">${escapeHtml(x.level)}</span><strong>${escapeHtml(x.id)}</strong><p>${escapeHtml(x.question)}</p><small>Kunci: ${escapeHtml(x.answer)} · ${x.active?'Aktif':'Nonaktif'}</small></div><div><button class="button button-secondary button-small" type="button" data-question-edit="${escapeAttr(x.id)}">Edit</button><button class="button button-ghost button-small" type="button" data-question-toggle="${escapeAttr(x.id)}" data-active="${x.active?'0':'1'}">${x.active?'Nonaktifkan':'Aktifkan'}</button></div></article>`).join(''):'<p class="muted">Soal tidak ditemukan.</p>'; }
+  async function loadCmsQuestions(moduleName){ if(!canManageContent()||!moduleName)return; $('#cmsQuestionList').innerHTML='<p class="muted">Memuat soalâ€¦</p>'; try{const result=await api.adminQuestions(moduleName); state.cms.questions=result.questions||[]; renderCmsQuestions();}catch(e){handleApiError(e);} }
+  function renderCmsQuestions(){ const q=$('#cmsQuestionSearch')?.value.trim().toLowerCase()||''; const rows=(state.cms.questions||[]).filter(x=>!q||`${x.id} ${x.question}`.toLowerCase().includes(q)); $('#cmsQuestionList').innerHTML=rows.length?rows.map(x=>`<article class="cms-question-card ${x.active?'':'inactive'}"><div><span class="badge">${escapeHtml(x.level)}</span><strong>${escapeHtml(x.id)}</strong><p>${escapeHtml(x.question)}</p><small>Kunci: ${escapeHtml(x.answer)} Â· ${x.active?'Aktif':'Nonaktif'}</small></div><div><button class="button button-secondary button-small" type="button" data-question-edit="${escapeAttr(x.id)}">Edit</button><button class="button button-ghost button-small" type="button" data-question-toggle="${escapeAttr(x.id)}" data-active="${x.active?'0':'1'}">${x.active?'Nonaktifkan':'Aktifkan'}</button></div></article>`).join(''):'<p class="muted">Soal tidak ditemukan.</p>'; }
   function handleQuestionListAction(event){ const edit=event.target.closest('[data-question-edit]'), toggle=event.target.closest('[data-question-toggle]'); if(edit){const item=state.cms.questions.find(x=>x.id===edit.dataset.questionEdit);openQuestionEditor(item);} if(toggle)toggleCmsQuestion(toggle.dataset.questionToggle,toggle.dataset.active==='1'); }
   function openQuestionEditor(item=null){ populateCmsQuestionModules(); const selected=item?.module||$('#cmsQuestionModule').value||(state.cms.overview?.modules?.[0]?.name||''); $('#questionEditorHeading').textContent=item?'Edit soal':'Tambah soal'; $('#questionEditorId').value=item?.id||''; $('#questionEditorModule').value=selected; $('#questionEditorLevel').value=item?.level||'Medium'; $('#questionEditorText').value=item?.question||''; $('#questionOptionA').value=item?.optionA||''; $('#questionOptionB').value=item?.optionB||''; $('#questionOptionC').value=item?.optionC||''; $('#questionOptionD').value=item?.optionD||''; $('#questionAnswer').value=item?.answer||'A'; $('#questionExplanation').value=item?.explanation||''; $('#questionActive').checked=item?.active!==false; showDialog($('#questionEditorDialog')); }
-  async function saveCmsQuestion(){const payload={id:$('#questionEditorId').value,module:$('#questionEditorModule').value,level:$('#questionEditorLevel').value,question:$('#questionEditorText').value,optionA:$('#questionOptionA').value,optionB:$('#questionOptionB').value,optionC:$('#questionOptionC').value,optionD:$('#questionOptionD').value,answer:$('#questionAnswer').value,explanation:$('#questionExplanation').value,active:$('#questionActive').checked};setButtonBusyText($('#saveQuestionButton'),true,'Menyimpan…');try{const r=await api.adminSaveQuestion(payload);toast(r.message,'success');$('#questionEditorDialog').close();state.cms.overview=null;await loadCmsOverview(true);$('#cmsQuestionModule').value=payload.module;await loadCmsQuestions(payload.module);}catch(e){handleApiError(e);}finally{setButtonBusyText($('#saveQuestionButton'),false,'Simpan soal');}}
+  async function saveCmsQuestion(){const payload={id:$('#questionEditorId').value,module:$('#questionEditorModule').value,level:$('#questionEditorLevel').value,question:$('#questionEditorText').value,optionA:$('#questionOptionA').value,optionB:$('#questionOptionB').value,optionC:$('#questionOptionC').value,optionD:$('#questionOptionD').value,answer:$('#questionAnswer').value,explanation:$('#questionExplanation').value,active:$('#questionActive').checked};setButtonBusyText($('#saveQuestionButton'),true,'Menyimpanâ€¦');try{const r=await api.adminSaveQuestion(payload);toast(r.message,'success');$('#questionEditorDialog').close();state.cms.overview=null;await loadCmsOverview(true);$('#cmsQuestionModule').value=payload.module;await loadCmsQuestions(payload.module);}catch(e){handleApiError(e);}finally{setButtonBusyText($('#saveQuestionButton'),false,'Simpan soal');}}
   async function toggleCmsQuestion(id,active){try{const r=await api.adminSetQuestionActive({id,active});toast(r.message,'success');await loadCmsQuestions($('#cmsQuestionModule').value);}catch(e){handleApiError(e);}}
 
-  async function loadRoleUsers(){ if(!isSuperAdmin())return; $('#roleManagementBody').innerHTML=emptyRow(5,'Memuat akun…'); try{const result=await api.adminUsers();state.cms.users=result.users||[];renderRoleUsers();}catch(e){handleApiError(e);} }
+  async function loadRoleUsers(){ if(!isSuperAdmin())return; $('#roleManagementBody').innerHTML=emptyRow(5,'Memuat akunâ€¦'); try{const result=await api.adminUsers();state.cms.users=result.users||[];renderRoleUsers();}catch(e){handleApiError(e);} }
   function renderRoleUsers(){ const users=state.cms.users||[]; $('#roleManagementBody').innerHTML=users.length?users.map(user=>`<tr><td><strong>${escapeHtml(user.id)}</strong></td><td>${escapeHtml(user.name||'-')}</td><td>${accountStatusPill(user.status)}</td><td>${escapeHtml(user.role||'User')}</td><td><select class="role-select" data-role-user="${escapeAttr(user.id)}" ${String(user.id).toUpperCase()==='ADMIN'?'disabled':''}><option value="User" ${roleKey(user.role)==='user'?'selected':''}>User</option><option value="Trainer" ${roleKey(user.role)==='trainer'?'selected':''}>Trainer</option><option value="ContentAdmin" ${roleKey(user.role)==='contentadmin'?'selected':''}>ContentAdmin</option><option value="SuperAdmin" ${roleKey(user.role)==='superadmin'?'selected':''}>SuperAdmin</option></select></td></tr>`).join(''):emptyRow(5,'Belum ada akun.'); }
   async function handleRoleChange(event){ const select=event.target.closest('[data-role-user]'); if(!select)return; const id=select.dataset.roleUser,role=select.value; showConfirm('Ubah role akun?',`${id} akan memiliki role ${role}.`,'Simpan role',async()=>{try{const r=await api.adminUpdateUserRole({id,role});toast(r.message,'success');await loadRoleUsers();if(id===state.user.id){await refreshBootstrap();configureUserUI();initializeAdminArea();}}catch(e){handleApiError(e);await loadRoleUsers();}}); }
 
-  function renderLearningBlocks(blocks){ return (Array.isArray(blocks)?blocks:[]).map(block=>{const type=String(block.type||'paragraph');if(type==='heading')return `<h4 class="learning-block-heading">${escapeHtml(block.text||'')}</h4>`;if(type==='paragraph')return `<p class="learning-block-paragraph">${escapeHtml(block.text||'')}</p>`;if(type==='highlight')return `<aside class="learning-highlight">${escapeHtml(block.text||'')}</aside>`;if(type==='formula')return `<pre class="learning-formula">${escapeHtml(block.text||'')}</pre>`;if(type==='bullets')return `<ul class="learning-block-bullets">${(block.items||[]).map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>`;if(type==='image'&&block.url)return `<figure class="learning-image"><img loading="lazy" decoding="async" src="${escapeAttr(block.url)}" alt="${escapeAttr(block.alt||'Visual materi')}"/>${block.caption?`<figcaption>${escapeHtml(block.caption)}</figcaption>`:''}</figure>`;if(type==='embed'&&block.url)return `<div class="learning-embed"><button class="button button-secondary button-small" type="button" data-embed-url="${escapeAttr(block.url)}">${escapeHtml(block.label||'Buka materi visual')}</button><a class="text-link" href="${escapeAttr(block.url)}" target="_blank" rel="noopener">Buka tab baru ↗</a>${block.caption?`<p>${escapeHtml(block.caption)}</p>`:''}<div class="embed-slot"></div></div>`;return '';}).join(''); }
+  function renderLearningBlocks(blocks){ return (Array.isArray(blocks)?blocks:[]).map(block=>{const type=String(block.type||'paragraph');if(type==='heading')return `<h4 class="learning-block-heading">${escapeHtml(block.text||'')}</h4>`;if(type==='paragraph')return `<p class="learning-block-paragraph">${escapeHtml(block.text||'')}</p>`;if(type==='highlight')return `<aside class="learning-highlight">${escapeHtml(block.text||'')}</aside>`;if(type==='formula')return `<pre class="learning-formula">${escapeHtml(block.text||'')}</pre>`;if(type==='bullets')return `<ul class="learning-block-bullets">${(block.items||[]).map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>`;if(type==='image'&&block.url)return `<figure class="learning-image"><img loading="lazy" decoding="async" src="${escapeAttr(block.url)}" alt="${escapeAttr(block.alt||'Visual materi')}"/>${block.caption?`<figcaption>${escapeHtml(block.caption)}</figcaption>`:''}</figure>`;if(type==='embed'&&block.url)return `<div class="learning-embed"><button class="button button-secondary button-small" type="button" data-embed-url="${escapeAttr(block.url)}">${escapeHtml(block.label||'Buka materi visual')}</button><a class="text-link" href="${escapeAttr(block.url)}" target="_blank" rel="noopener">Buka tab baru â†—</a>${block.caption?`<p>${escapeHtml(block.caption)}</p>`:''}<div class="embed-slot"></div></div>`;return '';}).join(''); }
   function bindEmbedLoaders(root){ if(!root)return; $$('[data-embed-url]',root).forEach(btn=>btn.addEventListener('click',()=>{const wrap=btn.closest('.learning-embed'),slot=$('.embed-slot',wrap);if(slot.querySelector('iframe')){slot.innerHTML='';btn.textContent='Tampilkan materi';return;}const iframe=document.createElement('iframe');iframe.loading='lazy';iframe.src=btn.dataset.embedUrl;iframe.title=btn.textContent;iframe.referrerPolicy='no-referrer-when-downgrade';slot.appendChild(iframe);btn.textContent='Sembunyikan materi';})); }
   function showDialog(dialog){ if(!dialog)return;if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open',''); }
   function setButtonBusyText(button,busy,label){ if(!button)return;button.disabled=busy;button.textContent=label; }
@@ -1028,7 +1028,7 @@
     const active = stats.filter(item => item.attempts > 0).sort((a,b)=>a.averageScore-b.averageScore);
     const lowest = active[0];
     $('#adminRecommendation').innerHTML = lowest ? `
-      <div class="recommendation-card"><span class="big-icon">📌</span><h3>${escapeHtml(lowest.module)}</h3><p>Rata-rata ${Number(lowest.averageScore)||0} dari ${Number(lowest.attempts)||0} percobaan. Prioritaskan refresh materi, diskusi kasus, dan remedial terarah.</p></div>` : '<p class="muted">Belum ada data evaluasi.</p>';
+      <div class="recommendation-card"><span class="big-icon">ðŸ“Œ</span><h3>${escapeHtml(lowest.module)}</h3><p>Rata-rata ${Number(lowest.averageScore)||0} dari ${Number(lowest.attempts)||0} percobaan. Prioritaskan refresh materi, diskusi kasus, dan remedial terarah.</p></div>` : '<p class="muted">Belum ada data evaluasi.</p>';
   }
 
   function renderAdminResults() {
